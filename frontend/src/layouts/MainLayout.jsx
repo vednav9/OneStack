@@ -8,8 +8,9 @@ export default function MainLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
+
       <div className="flex flex-1 max-w-7xl mx-auto w-full">
-        <aside className="w-64 border-r bg-white">
+        <aside className="hidden lg:block w-64 border-r bg-white">
           <LeftSidebar />
         </aside>
 
@@ -17,10 +18,11 @@ export default function MainLayout() {
           <Outlet />
         </main>
 
-        <aside className="w-80 border-l bg-white">
+        <aside className="hidden xl:block w-80 border-l bg-white">
           <RightSidebar />
         </aside>
       </div>
+
       <Footer />
     </div>
   );
