@@ -1,10 +1,11 @@
 import SearchBar from "../components/search/SearchBar";
 import Filters from "../components/search/Filters";
 import BlogCard from "../components/blog/BlogCard";
+import BlogFeed from "../components/blog/BlogFeed";
 import useBlogs from "../hooks/useBlogs";
 
 export default function Home() {
-  const { blogs } = useBlogs();
+  const { blogs, loadMore } = useBlogs();
 
   return (
     <div className="space-y-6">
@@ -12,11 +13,10 @@ export default function Home() {
 
       <Filters />
 
-      <div className="space-y-4">
-        {blogs.map((blog) => (
-          <BlogCard key={blog.id} blog={blog} />
-        ))}
-      </div>
+      <BlogFeed
+        blogs={blogs}
+        loadMore={loadMore}
+      />
     </div>
   );
 }
