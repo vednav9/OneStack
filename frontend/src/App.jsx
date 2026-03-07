@@ -1,12 +1,19 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import MainLayout from "./layouts/MainLayout";
+import Home from "./pages/Home";
+import BlogPage from "./pages/BlogPage";
 
-
-function App() {
-
+export default function App() {
   return (
-    <>
-      
-    </>
-  )
-}
+    <BrowserRouter>
+      <Routes>
 
-export default App
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/blog/:id" element={<BlogPage />} />
+        </Route>
+
+      </Routes>
+    </BrowserRouter>
+  );
+}
