@@ -3,23 +3,25 @@ export default function RightSidebar() {
     "AI",
     "Web Development",
     "Startups",
-    "Blockchain",
     "Programming",
+    "Machine Learning",
   ];
 
   return (
-    <div className="p-5">
-      <h3 className="font-semibold mb-3">Suggested Topics</h3>
+    <div className="p-5 space-y-6">
+      <div>
+        <h3 className="font-semibold mb-3">Suggested Topics</h3>
 
-      <div className="flex flex-wrap gap-2">
-        {topics.map((topic) => (
-          <span
-            key={topic}
-            className="px-3 py-1 bg-gray-100 rounded-full text-sm cursor-pointer hover:bg-gray-200"
-          >
-            {topic}
-          </span>
-        ))}
+        <div className="flex flex-wrap gap-2">
+          {topics.map((topic) => (
+            <span
+              key={topic}
+              className="px-3 py-1 text-sm bg-gray-100 rounded-full hover:bg-gray-200 cursor-pointer"
+            >
+              {topic}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
