@@ -1,3 +1,5 @@
+import SuggestedBlogs from "../blog/SuggestedBlogs";
+
 export default function RightSidebar() {
   const topics = [
     "AI",
@@ -5,6 +7,16 @@ export default function RightSidebar() {
     "Startups",
     "Programming",
     "Machine Learning",
+  ];
+  const blogs = [
+    {
+      id: 10,
+      title: "Future of AI Development",
+      description: "AI will change coding",
+      author: "OpenAI",
+      readTime: 4,
+      likes: 50
+    }
   ];
 
   return (
@@ -22,6 +34,7 @@ export default function RightSidebar() {
             </span>
           ))}
         </div>
+        <SuggestedBlogs blogs={blogs} />
       </div>
     </div>
   );
