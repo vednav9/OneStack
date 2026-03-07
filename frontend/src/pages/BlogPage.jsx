@@ -1,15 +1,19 @@
 import { useParams } from "react-router-dom";
+import BlogReader from "../components/blog/BlogReader";
 
 export default function BlogPage() {
   const { id } = useParams();
 
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Blog Title {id}</h1>
+  const blog = {
+    title: "Understanding React Server Components",
+    url: "https://example.com",
+  };
 
-      <div className="border rounded-lg overflow-hidden">
-        <iframe src="https://example.com" className="w-full h-[800px]" />
-      </div>
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">{blog.title}</h1>
+
+      <BlogReader url={blog.url} />
     </div>
   );
 }
