@@ -4,8 +4,9 @@ import cors from "cors";
 import { env } from "./src/config/env.js";
 import logger from "./src/utils/logger.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
-import routes from "./src/routes/index.js";
 import requestLogger from "./src/middlewares/requestLogger.js";
+import routes from "./src/routes/index.js";
+import authRoutes from "./src/routes/authRoutes.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", routes);
+app.use("/api/auth", authRoutes);
 
 app.use(errorHandler);
 
