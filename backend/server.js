@@ -5,11 +5,13 @@ import { env } from "./src/config/env.js";
 import logger from "./src/utils/logger.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 import routes from "./src/routes/index.js";
+import requestLogger from "./src/middlewares/requestLogger.js";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 app.get("/", (req, res) => {
     res.json({ message: "API is running" });
