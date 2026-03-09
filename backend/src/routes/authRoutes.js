@@ -1,13 +1,14 @@
 import express from "express";
 import passport from "passport";
 
-import { register, login } from "../controllers/authController.js";
+import { register, login, refresh } from "../controllers/authController.js";
 import { generateAccessToken } from "../utils/jwt.js";
 
 const router = express.Router();
 
 router.post("/register", register);
 router.post("/login", login);
+router.post("/refresh", refresh);
 router.get(
     "/google",
     passport.authenticate("google", {
