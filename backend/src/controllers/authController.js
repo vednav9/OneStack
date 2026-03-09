@@ -54,6 +54,16 @@ export async function login(req, res) {
     }
 }
 
+export async function logout(req,res) {
+    const {refreshToken}=req.body;
+
+    await prisma.refreshToken.deleteMany({
+        where: {token:refreshToken}
+    });
+
+    res.json({message: "Logged out"});
+}
+
 export async function refresh(req, res) {
     const {refreshToken}= req.body;
 
