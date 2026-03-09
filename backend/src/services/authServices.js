@@ -21,3 +21,12 @@ export async function findUserByEmail(email) {
         where: { email },
     });
 }
+
+export async function saveRefreshToken(userId, token) {
+    await prisma.refreshToken.create({
+        data: {
+            token,
+            userId,
+        },
+    });
+}
