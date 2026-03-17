@@ -23,6 +23,10 @@ model User {
   createdAt DateTime @default(now())
 
   refreshToken RefreshToken[]
+  savedBlogs SavedBlog[]
+  likedBlogs LikedBlog[]
+  readingHistory ReadingHistory[]
+  lists List[]
 }
 
 model RefreshToken {
@@ -32,4 +36,86 @@ model RefreshToken {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Blog {
+  id String @id @default(uuid())
+  title String
+  description String?
+  content String?
+  sourceURL String
+  sourceSite String
+  author String?
+  readTime Int?
+  thumbnail String?
+  createdAt DateTime @default(now())
+
+  tag BlogTag[]
+  savedBy SavedBlog[]
+  likedBy LikedBlog[]
+  history ReadingHistory[]
+  listBlog ListBlog[]
+}
+
+model Tag {
+  id    String @id @default(uuid())
+  name  String @unique
+
+  blogs BlogTag[]
+}
+
+model BlogTag {
+  blogId String
+  tagId  String
+
+  blog Blog @relation(fields: [blogId], references: [id])
+  tag  Tag  @relation(fields: [tagId], references: [id])
+
+  @@id([blogId, tagId])
+}
+
+model SavedBlog {
+  id     String @id @default(uuid())
+  userId String
+  blogId String
+
+  user User @relation(fields: [userId], references: [id])
+  blog Blog @relation(fields: [blogId], references: [id])
+}
+
+model LikedBlog {
+  id     String @id @default(uuid())
+  userId String
+  blogId String
+
+  user User @relation(fields: [userId], references: [id])
+  blog Blog @relation(fields: [blogId], references: [id])
+}
+
+model ReadingHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  blogId    String
+  readAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  blog Blog @relation(fields: [blogId], references: [id])
+}
+
+model List {
+  id     String @id @default(uuid())
+  name   String
+  userId String
+
+  user User @relation(fields: [userId], references: [id])
+  blogs ListBlog[]
+}
+
+model ListBlog {
+  id     String @id @default(uuid())
+  listId String
+  blogId String
+
+  list List @relation(fields: [listId], references: [id])
+  blog Blog @relation(fields: [blogId], references: [id])
 }
