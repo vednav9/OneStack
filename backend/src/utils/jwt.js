@@ -18,5 +18,5 @@ export function generateRefreshToken(userId) {
 }
 
 export function verifyAccessToken(token){
-    jwt.verify(token, env.jwtSecret);
+    return jwt.verify(token, env.jwtSecret);
 }
