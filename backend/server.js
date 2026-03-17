@@ -8,6 +8,7 @@ import errorHandler from "./src/middlewares/errorHandler.js";
 import requestLogger from "./src/middlewares/requestLogger.js";
 import routes from "./src/routes/index.js";
 import authRoutes from "./src/routes/authRoutes.js";
+import userRoutes from "./src/routes/userRoutes.js";
 import "./src/config/googleStrategy.js";
 
 const app = express();
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 
 app.use("/api", routes);
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 
 app.use(errorHandler);
 
