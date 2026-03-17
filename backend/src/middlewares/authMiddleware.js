@@ -1,9 +1,9 @@
-import jwt from "../utils/jwt.js";
+import { verifyAccessToken } from "../utils/jwt.js";
 
 export default function authMiddleware(req, res, next) {
-    const authHeader = req.header.authorization;
+    const authHeader = req.headers.authorization;
     if (!authHeader) {
-        return res.json({ error: "Unauthorized" });
+        return res.status(401).json({ error: "Unauthorized" });
     }
 
     const token = authHeader.split(" ")[1];
