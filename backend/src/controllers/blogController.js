@@ -11,3 +11,11 @@ export async function getBlog(req, res) {
 
     res.json(blog);
 }
+
+export async function saveBlogController(req, res) {
+    const { id } = req.params;
+
+    const result = await saveBlog(req.user.userId, id);
+
+    res.json(result);
+}
