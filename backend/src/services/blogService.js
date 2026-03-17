@@ -17,3 +17,9 @@ export async function getBlogById(id) {
         },
     });
 }
+
+export async function saveBlog(userId, blogId) {
+    return prisma.savedBlog.create({
+        data: { userId, blogId },
+    });
+}
