@@ -10,6 +10,7 @@ import routes from "./src/routes/index.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import blogRoutes from "./src/routes/blogRoutes.js";
+import searchRoutes from "./src/routes/searchRoutes.js";
 import "./src/config/googleStrategy.js";
 
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api", routes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/search", searchRoutes);
 
 app.use(errorHandler);
 
