@@ -19,3 +19,19 @@ export async function saveBlogController(req, res) {
 
     res.json(result);
 }
+
+export async function likeBlogController(req, res) {
+    const { id } = req.params;
+
+    const result = await likeBlog(req.user.userId, id);
+
+    res.json(result);
+}
+
+export async function readBlog(req, res) {
+    const { id } = req.params;
+
+    await addToHistory(req.user.userId, id);
+
+    res.json({ message: "Recorded" });
+}
