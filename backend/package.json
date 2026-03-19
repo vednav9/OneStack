@@ -14,15 +14,20 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
+    "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
+    "bullmq": "^5.71.0",
+    "cheerio": "^1.2.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.20.0",
     "prisma": "^7.4.2",
+    "rss-parser": "^3.13.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {
