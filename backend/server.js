@@ -12,6 +12,8 @@ import userRoutes from "./src/routes/userRoutes.js";
 import blogRoutes from "./src/routes/blogRoutes.js";
 import searchRoutes from "./src/routes/searchRoutes.js";
 import "./src/config/googleStrategy.js";
+import "./src/jobs/blogParser.js";
+import "./src/jobs/scheduler.js";
 
 const app = express();
 
