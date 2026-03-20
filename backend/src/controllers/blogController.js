@@ -1,4 +1,10 @@
-import { getAllBlogs, getBlogById } from "../services/blogService.js";
+import {
+    addToHistory,
+    getAllBlogs,
+    getBlogById,
+    likeBlog,
+    saveBlog,
+} from "../services/blogService.js";
 
 export async function getBlogs(req, res) {
     const blogs = await getAllBlogs();
