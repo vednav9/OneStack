@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/", getBlogs);
 router.get("/:id", getBlog);
-router.get("/:id/save", authMiddleware, saveBlogController);
+router.post("/:id/save", authMiddleware, saveBlogController);
 router.post("/:id/like", authMiddleware, likeBlogController);
 router.post("/:id/read", authMiddleware, readBlog);
 
