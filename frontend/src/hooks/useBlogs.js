@@ -1,25 +1,31 @@
 import { useEffect, useState } from "react";
+import * as blogService from "../services/blogService";
 
 export default function useBlogs() {
+    const [blogs, setBlogs] = useState([]);
 
-  const [blogs, setBlogs] = useState([]);
+    async function loadBlogs() {
+        const data = await blogService.getBlogs();
+        setBlogs(data);
+    }
 
-  useEffect(() => {
+    useEffect(() => {
+        loadBlogs();
+    }, []);
 
-    const dummy = [
-      {
-        id: 1,
-        title: "Understanding React Server Components",
-        description: "A deep dive into RSC architecture",
-        author: "Dan Abramov",
-        readTime: 5,
-        likes: 120
-      }
-    ];
+    async function handleSave(id) {
+        await blogService.saveBlog(id);
+        alert("Saved!");
+    }
 
-    setBlogs(dummy);
+    async function handleLike(id) {
+        await blogService.likeBlog(id);
+        alert("Liked!");
+    }
 
-  }, []);
-
-  return { blogs };
+    return {
+        blogs,
+        handleSave,
+        handleLike,
+    };
 }
