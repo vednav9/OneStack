@@ -11,6 +11,7 @@ import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import blogRoutes from "./src/routes/blogRoutes.js";
 import searchRoutes from "./src/routes/searchRoutes.js";
+import recommendationRoutes from "./src/routes/recommendationRoutes.js";
 import "./src/config/googleStrategy.js";
 import "./src/jobs/blogParser.js";
 import "./src/jobs/scheduler.js";
@@ -31,6 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/recommendation", recommendationRoutes);
 
 app.use(errorHandler);
 
