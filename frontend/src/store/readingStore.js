@@ -11,4 +11,4 @@ const useReadingStore = create((set) => ({
   toggleReader: () => set((state) => ({ readerMode: !state.readerMode })),
 }));
 
-export default useReadingStore;
+export { useReadingStore };
