@@ -19,4 +19,4 @@ const useBlogStore = create((set) => ({
     })),
 }));
 
-export default useBlogStore;
+export { useBlogStore };
