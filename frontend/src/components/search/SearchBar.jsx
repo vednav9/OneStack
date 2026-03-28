@@ -1,47 +1,71 @@
 import { useState } from "react";
+import { Search, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { cn } from "../../utils/cn";
 
-export default function SearchBar() {
+export default function SearchBar({ className, initialQuery = "", autoFocus = false }) {
+  const [query, setQuery] = useState(initialQuery);
+  const [isFocused, setIsFocused] = useState(false);
+  const navigate = useNavigate();
 
-  const [query, setQuery] = useState("");
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+    }
+  };
 
-  const suggestions = [
-    "React",
-    "AI",
-    "Next.js",
-    "Web Development",
-    "Machine Learning"
-  ];
-
-  const filtered = suggestions.filter((s) =>
-    s.toLowerCase().includes(query.toLowerCase())
-  );
+  const clearSearch = () => {
+    setQuery("");
+    // Optionally focus input again
+    document.getElementById("search-input-field")?.focus();
+  };
 
   return (
-    <div className="relative">
-
+    <form
+      id="search-form"
+      onSubmit={handleSearch}
+      className={cn(
+        "relative flex items-center transition-all duration-200",
+        className
+      )}
+    >
+      <div
+        className={cn(
+          "absolute left-3 p-1 rounded-md transition-colors",
+          isFocused ? "text-primary bg-primary/10" : "text-muted-foreground"
+        )}
+      >
+        <Search className="h-4 w-4" />
+      </div>
+      
       <input
-        type="text"
-        placeholder="Search blogs, topics..."
+        id="search-input-field"
+        type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full border rounded-lg px-4 py-2 outline-none"
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        autoFocus={autoFocus}
+        placeholder="Search for tags, authors, or companies..."
+        className={cn(
+          "h-12 w-full rounded-xl border bg-card pl-11 pr-10 text-sm shadow-sm transition-colors",
+          "placeholder:text-muted-foreground",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary",
+          isFocused ? "border-primary" : "border-border"
+        )}
       />
 
       {query && (
-        <div className="absolute w-full bg-white border mt-1 rounded shadow">
-
-          {filtered.map((item) => (
-            <div
-              key={item}
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            >
-              {item}
-            </div>
-          ))}
-
-        </div>
+        <button
+          type="button"
+          onClick={clearSearch}
+          className="absolute right-3 p-1 rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+          aria-label="Clear search"
+        >
+          <X className="h-4 w-4" />
+        </button>
       )}
-
-    </div>
+    </form>
   );
 }
