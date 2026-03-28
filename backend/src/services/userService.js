@@ -12,3 +12,9 @@ export async function updateUser(id, data) {
         data
     })
 }
+
+export async function followedTopic(userId,tagId) {
+    return prisma.followedTopic.create({
+        data:{userId,tagId}
+    });
+}
