@@ -27,6 +27,7 @@ model User {
   likedBlogs LikedBlog[]
   readingHistory ReadingHistory[]
   lists List[]
+  followedTopics FollowedTopic[]
 }
 
 model RefreshToken {
@@ -64,6 +65,7 @@ model Tag {
   name  String @unique
 
   blogs BlogTag[]
+  followedBy FollowedTopic[]
 }
 
 model BlogTag {
@@ -120,4 +122,13 @@ model ListBlog {
 
   list List @relation(fields: [listId], references: [id])
   blog Blog @relation(fields: [blogId], references: [id])
+}
+
+model FollowedTopic {
+  id String @id @default(uuid())
+  userId String
+  tagId String
+
+  user User @relation(fields:[userId],references:[id])
+  tag Tag @relation(fields:[tagId],references:[id])
 }
