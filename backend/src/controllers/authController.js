@@ -5,6 +5,8 @@ import {
     registerUser,
     findUserByEmail,
     saveRefreshToken,
+    deleteRefreshToken,
+    findRefreshToken,
 } from "../services/authServices.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
 import prisma from "../config/db.js";
@@ -57,34 +59,39 @@ export async function login(req, res) {
     }
 }
 
-export async function logout(req,res) {
-    const {refreshToken}=req.body;
+export async function logout(req, res) {
+    const { refreshToken } = req.body;
 
-    await prisma.refreshToken.deleteMany({
-        where: {token:refreshToken}
-    });
+    if (refreshToken) {
+        await deleteRefreshToken(refreshToken);
+    }
 
-    res.json({message: "Logged out"});
+    res.json({ message: "Logged out" });
 }
 
 export async function refresh(req, res) {
-    const {refreshToken}= req.body;
+    const { refreshToken } = req.body;
 
-    if(!refreshToken){
-        return res.json({error: "Missing Token"});
+    if (!refreshToken) {
+        return res.status(400).json({ error: "Missing token" });
     }
 
-    const storedToken = await prisma.refreshToken.findUnique({
-        where: {token: refreshToken}
-    });
+    try {
+        const storedToken = await findRefreshToken(refreshToken);
 
-    if(!storedToken){
-        return res.status(403).json({error: "Invalid Token"});
+        if (!storedToken) {
+            return res.status(403).json({ error: "Invalid token" });
+        }
+
+        const decoded = jwt.verify(
+            refreshToken,
+            process.env.JWT_REFRESH_SECRET,
+        );
+
+        const accessToken = generateAccessToken(decoded.userId);
+
+        res.json({ accessToken });
+    } catch (err) {
+        return res.status(403).json({ error: "Invalid or expired token" });
     }
-
-    const decoded=jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-
-    const accessToken=generateAccessToken(decoded.userId);
-
-    res.json({accessToken});
 }
