@@ -20,7 +20,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(errorHandler);
 app.use(requestLogger);
 app.use(passport.initialize());
 
@@ -35,6 +34,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/recommendation", recommendationRoutes);
 
+app.use(errorHandler);
 
 app.listen(env.port, () => {
     logger.info(`Server is running on ${env.port}`);
