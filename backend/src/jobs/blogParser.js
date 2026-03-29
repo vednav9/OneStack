@@ -8,7 +8,7 @@ import { generateTags } from "../utils/tagGenerator.js";
 new Worker(
     "crawl",
     async (job) => {
-        const { url, title } = job.data;
+        const { url, title, publishedAt, author } = job.data;
         const { data } = await axios.get(url, { timeout: 15000 });
         const $ = cheerio.load(data);
         const description = $("p").first().text().trim();
@@ -19,6 +19,13 @@ new Worker(
             .join("\n") || description;
         const sourceSite = new URL(url).hostname;
         const generatedTags = generateTags(`${title} ${description} ${content}`);
+        const parsedPublishedAt = publishedAt ? new Date(publishedAt) : null;
+        const normalizedAuthor = typeof author === "string" ? author.trim() : "";
+        const authorValue = normalizedAuthor || undefined;
+        const publishedAtValue =
+            parsedPublishedAt && !Number.isNaN(parsedPublishedAt.getTime())
+                ? parsedPublishedAt
+                : undefined;
 
         const blog = await prisma.blog.upsert({
             where: { sourceURL: url },
@@ -27,6 +34,8 @@ new Worker(
                 description,
                 content,
                 sourceSite,
+                author: authorValue,
+                publishedAt: publishedAtValue,
             },
             create: {
                 title,
@@ -34,6 +43,8 @@ new Worker(
                 content,
                 sourceURL: url,
                 sourceSite,
+                author: authorValue,
+                publishedAt: publishedAtValue,
                 tag: {
                     create: generatedTags.map((name) => ({
                         tag: {
