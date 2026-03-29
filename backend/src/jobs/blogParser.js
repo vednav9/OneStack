@@ -20,8 +20,15 @@ new Worker(
         const sourceSite = new URL(url).hostname;
         const generatedTags = generateTags(`${title} ${description} ${content}`);
 
-        const blog = await prisma.blog.create({
-            data: {
+        const blog = await prisma.blog.upsert({
+            where: { sourceURL: url },
+            update: {
+                title,
+                description,
+                content,
+                sourceSite,
+            },
+            create: {
                 title,
                 description,
                 content,
