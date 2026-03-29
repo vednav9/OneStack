@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 import {
     registerUser,
@@ -73,11 +74,11 @@ export async function refresh(req, res) {
         return res.json({error: "Missing Token"});
     }
 
-    const tokenEmails= await prisma.refreshToken.findUnique({
+    const storedToken = await prisma.refreshToken.findUnique({
         where: {token: refreshToken}
     });
 
-    if(!tokenEmails){
+    if(!storedToken){
         return res.status(403).json({error: "Invalid Token"});
     }
 
