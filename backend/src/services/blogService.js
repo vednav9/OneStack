@@ -32,14 +32,18 @@ export async function getBlogById(id) {
 }
 
 export async function saveBlog(userId, blogId) {
-    return prisma.savedBlog.create({
-        data: { userId, blogId },
+    return prisma.savedBlog.upsert({
+        where: { userId_blogId: { userId, blogId } },
+        update: {},
+        create: { userId, blogId },
     });
 }
 
 export async function likeBlog(userId, blogId) {
-    return prisma.likedBlog.create({
-        data: { userId, blogId },
+    return prisma.likedBlog.upsert({
+        where: { userId_blogId: { userId, blogId } },
+        update: {},
+        create: { userId, blogId },
     });
 }
 
