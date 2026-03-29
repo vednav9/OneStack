@@ -1,7 +1,8 @@
 import prisma from "../config/db.js";
+import { normalizeBlogTags } from "./blogService.js";
 
 export async function getTrendingBlogs() {
-    return prisma.blog.findMany({
+    const blogs = await prisma.blog.findMany({
         take: 10,
         orderBy: [
             { likedBy: { _count: "desc" } },
@@ -9,6 +10,7 @@ export async function getTrendingBlogs() {
             { createdAt: "desc" },
         ],
         include: {
+            tag: { include: { tag: true } },
             _count: {
                 select: {
                     likedBy: true,
@@ -17,4 +19,5 @@ export async function getTrendingBlogs() {
             },
         },
     });
+    return blogs.map(normalizeBlogTags);
 }
