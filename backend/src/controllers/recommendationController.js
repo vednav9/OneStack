@@ -7,7 +7,7 @@ import { getTrendingBlogs } from "../services/trendingService.js";
 
 export async function recommended(req, res) {
     const blogs = await getRecommendedBlogs(req.user.userId);
-    res.json(blog);
+    res.json(blogs);
 }
 
 export async function feed(req, res) {
