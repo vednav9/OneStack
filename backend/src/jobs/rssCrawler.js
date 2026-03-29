@@ -4,7 +4,13 @@ import { fileURLToPath } from "url";
 
 const parser = new Parser();
 
-const feeds = ["https://openai.com/blog/rss.xml", "https://dev.to/feed"];
+const feeds = [
+    "https://openai.com/blog/rss.xml",
+    "https://dev.to/feed",
+    "https://blog.cloudflare.com/rss/",
+    "https://techcrunch.com/feed/",
+    "https://www.theverge.com/rss/index.xml",
+];
 
 export async function runCrawler() {
     console.log("Starting crawler...");
