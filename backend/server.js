@@ -12,13 +12,18 @@ import userRoutes from "./src/routes/userRoutes.js";
 import blogRoutes from "./src/routes/blogRoutes.js";
 import searchRoutes from "./src/routes/searchRoutes.js";
 import recommendationRoutes from "./src/routes/recommendationRoutes.js";
+import tagRoutes from "./src/routes/tagRoutes.js";
+import listRoutes from "./src/routes/listRoutes.js";
 import "./src/config/googleStrategy.js";
 import "./src/jobs/blogParser.js";
 import "./src/jobs/scheduler.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+}));
 app.use(express.json());
 app.use(requestLogger);
 app.use(passport.initialize());
@@ -33,6 +38,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/recommendation", recommendationRoutes);
+app.use("/api/tags", tagRoutes);
+app.use("/api/lists", listRoutes);
 
 app.use(errorHandler);
 
