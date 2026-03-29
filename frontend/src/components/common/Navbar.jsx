@@ -5,6 +5,7 @@ import { useAuthStore } from "../../store/authStore";
 import { useThemeStore } from "../../store/themeStore";
 import { Button } from "../ui/Button";
 import UserMenu from "./UserMenu";
+import Notifications from "./Notifications";
 
 export default function Navbar({ onMenuClick }) {
   const { user } = useAuthStore();
@@ -109,16 +110,7 @@ export default function Navbar({ onMenuClick }) {
           {user ? (
             <>
               {/* Notifications */}
-              <Button
-                id="notifications-btn"
-                variant="ghost"
-                size="icon"
-                className="relative h-9 w-9 hidden sm:inline-flex"
-                aria-label="Notifications"
-              >
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
-              </Button>
+              <Notifications />
               <UserMenu />
             </>
           ) : (

@@ -24,12 +24,15 @@ export default function UserMenu() {
   if (!user) return null;
 
   const menuItems = [
-    { icon: User, label: "Profile", to: `/profile/${user.username || "me"}` },
+    { icon: User, label: "Profile", to: `/profile/me` },
     { icon: Bookmark, label: "Saved", to: "/saved" },
     { icon: Clock, label: "History", to: "/history" },
     { icon: LayoutDashboard, label: "Dashboard", to: "/admin" },
     { icon: Settings, label: "Settings", to: "/settings" },
   ];
+
+  const displayName = user.name || user.email || "User";
+  const avatarSrc = user.userPhoto || user.profilePicture;
 
   return (
     <div className="relative" ref={menuRef}>
@@ -42,9 +45,9 @@ export default function UserMenu() {
         aria-label="User menu"
       >
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user.profilePicture} alt={user.username} />
+          <AvatarImage src={avatarSrc} alt={displayName} />
           <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-            {(user.username || user.name || "U").charAt(0).toUpperCase()}
+            {displayName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </Button>
@@ -55,15 +58,13 @@ export default function UserMenu() {
           <div className="px-4 py-3 border-b">
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9">
-                <AvatarImage src={user.profilePicture} />
+                <AvatarImage src={avatarSrc} />
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                  {(user.username || user.name || "U").charAt(0).toUpperCase()}
+                  {displayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate">
-                  {user.fullName || user.username || user.name}
-                </p>
+                <p className="text-sm font-semibold truncate">{displayName}</p>
                 <p className="text-xs text-muted-foreground truncate">{user.email}</p>
               </div>
             </div>
