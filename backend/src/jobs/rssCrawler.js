@@ -24,6 +24,8 @@ export async function runCrawler() {
                 await crawlQueue.add("crawlBlog", {
                     url: item.link,
                     title: item.title,
+                    publishedAt: item.isoDate || item.pubDate || null,
+                    author: item.creator || item["dc:creator"] || item.author || null,
                 });
             }
             console.log(`Added items from ${feed} to queue.`);
