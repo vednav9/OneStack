@@ -1,24 +1,25 @@
-import { useState } from "react";
-import * as authService from "../services/authService";
+import { useAuthStore } from "../store/authStore";
 
+/**
+ * Thin wrapper around authStore for easy consumption.
+ * Components that just need to read auth state use this.
+ */
 export default function useAuth() {
-    const [user, setUser] = useState(null);
+  const { user, token, isLoading, error, login, logout, register, loginWithGoogle, fetchUser } =
+    useAuthStore();
 
-    async function loginUser(data) {
-        const res = await authService.login(data);
+  const isAuthenticated = !!token && !!user;
 
-        // Later we can fetch user profile here
-        setUser(res.user);
-    }
-
-    function logoutUser() {
-        authService.logout();
-        setUser(null);
-    }
-
-    return {
-        user,
-        loginUser,
-        logoutUser,
-    };
+  return {
+    user,
+    token,
+    isLoading,
+    error,
+    isAuthenticated,
+    login,
+    logout,
+    register,
+    loginWithGoogle,
+    fetchUser,
+  };
 }

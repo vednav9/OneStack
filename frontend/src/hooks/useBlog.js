@@ -16,7 +16,8 @@ export default function useBlog(id) {
       setLoading(true);
       setError(null);
       const data = await blogService.getBlog(id);
-      setBlog(data);
+      const singleBlog = data?.blog || data?.data || data;
+      setBlog(singleBlog);
     } catch (err) {
       console.error("Failed to fetch blog", err);
       setError(err.message || "Failed to load blog.");
