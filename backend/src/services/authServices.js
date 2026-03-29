@@ -30,3 +30,15 @@ export async function saveRefreshToken(userId, token) {
         },
     });
 }
+
+export async function deleteRefreshToken(refreshToken) {
+    await prisma.refreshToken.delete({
+        where: { token: refreshToken },
+    });
+}
+
+export async function findRefreshToken(refreshToken) {
+    return await prisma.refreshToken.findUnique({
+        where: { token: refreshToken },
+    });
+}
