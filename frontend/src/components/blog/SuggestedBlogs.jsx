@@ -8,7 +8,6 @@ export default function SuggestedBlogs({ blogs = [] }) {
 
   return (
     <section className="mt-14 pt-8 border-t">
-      <h2 className="text-xl font-bold mb-6">Related Articles</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {blogs.slice(0, 3).map((blog) => (
           <Link
