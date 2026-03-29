@@ -1,14 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useBlogs from "../hooks/useBlogs";
 import BlogFeed from "../components/blog/BlogFeed";
 import SearchBar from "../components/search/SearchBar";
 import { Compass, Hash } from "lucide-react";
 import Tag from "../components/ui/Tag";
 import { TOPICS } from "../utils/constants";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+import api from "../services/api";
 
 export default function Explore() {
-  const { blogs, loading } = useBlogs();
+  useDocumentTitle("Explore");
+  const { blogs, loading } = useBlogs("all");
   const [activeTab, setActiveTab] = useState("topics");
+  const [dynamicTopics, setDynamicTopics] = useState([]);
+  const [tagsLoading, setTagsLoading] = useState(true);
+
+  // Fetch real tags from backend
+  useEffect(() => {
+    api.get("/tags")
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDynamicTopics(data.slice(0, 40));
+        } else {
+          setDynamicTopics(TOPICS); // fallback
+        }
+      })
+      .catch(() => setDynamicTopics(TOPICS))
+      .finally(() => setTagsLoading(false));
+  }, []);
+
+  const topics = dynamicTopics.length > 0 ? dynamicTopics : TOPICS;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -59,16 +80,20 @@ export default function Explore() {
               Popular Engineering Topics
             </h2>
             <div className="flex flex-wrap gap-2 mb-10">
-              {TOPICS.map((topic) => (
-                <Tag
-                  key={topic}
-                  label={topic}
-                  to={`/topic/${topic.toLowerCase().replace(/ /g, "-")}`}
-                  className="px-4 py-2 text-sm"
-                />
-              ))}
+              {tagsLoading
+                ? TOPICS.slice(0, 10).map((t) => (
+                    <div key={t} className="h-8 w-24 rounded-full bg-secondary animate-pulse" />
+                  ))
+                : topics.map((topic) => (
+                    <Tag
+                      key={topic}
+                      label={topic}
+                      to={`/topic/${topic.toLowerCase().replace(/ /g, "-")}`}
+                      className="px-4 py-2 text-sm"
+                    />
+                  ))}
             </div>
-            
+
             <h2 className="font-semibold mb-4 text-lg border-b pb-2">Recently Added</h2>
             <BlogFeed blogs={blogs.slice(0, 5)} loading={loading} />
           </div>

@@ -1,16 +1,33 @@
+import { useState, useEffect } from "react";
 import { Bookmark } from "lucide-react";
-import { useBlogStore } from "../store/blogStore";
-import useBlogs from "../hooks/useBlogs";
 import BlogFeed from "../components/blog/BlogFeed";
 import EmptyState from "../components/ui/EmptyState";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/Button";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+import api from "../services/api";
+import { useAuthStore } from "../store/authStore";
 
 export default function SavedBlogs() {
-  const { savedBlogs } = useBlogStore();
-  const { blogs, loading } = useBlogs();
+  useDocumentTitle("Saved Articles");
+  const { user } = useAuthStore();
+  const [saved, setSaved] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const saved = blogs.filter((blog) => savedBlogs.includes(blog.id));
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    api.get("/user/saved")
+      .then((data) => {
+        setSaved(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [user]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -22,25 +39,38 @@ export default function SavedBlogs() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight">Saved Articles</h1>
           </div>
-          <p className="text-muted-foreground">
-            Your personal reading list of engineering blogs.
-          </p>
+          <p className="text-muted-foreground">Your personal reading list of engineering blogs.</p>
         </div>
-        <div className="text-right">
-          <span className="text-2xl font-bold">{saved.length}</span>
-          <p className="text-xs text-muted-foreground uppercase tracking-widest">SAVED</p>
-        </div>
+        {!loading && (
+          <div className="text-right">
+            <span className="text-2xl font-bold">{saved.length}</span>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest">SAVED</p>
+          </div>
+        )}
       </header>
 
       <div className="min-h-[500px]">
-        {loading ? (
+        {!user ? (
+          <EmptyState
+            title="Sign in to view saved articles"
+            description="Your saved articles are tied to your account."
+            icon={<Bookmark className="h-8 w-8" />}
+            action={
+              <Button asChild className="mt-4">
+                <Link to="/login">Sign In</Link>
+              </Button>
+            }
+          />
+        ) : error ? (
+          <p className="text-destructive text-sm">{error}</p>
+        ) : loading ? (
           <BlogFeed loading={true} />
         ) : saved.length > 0 ? (
           <BlogFeed blogs={saved} loading={false} />
         ) : (
           <EmptyState
             title="Your reading list is empty"
-            description="When you discover an interesting engineering blog you'd like to read later, save it and it will appear here."
+            description="When you discover an interesting engineering blog, save it and it will appear here."
             icon={<Bookmark className="h-8 w-8" />}
             action={
               <Button asChild className="mt-4">

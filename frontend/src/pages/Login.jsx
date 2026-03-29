@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
-import { Compass, ArrowRight } from "lucide-react";
+import { Compass, ArrowRight, Chrome } from "lucide-react";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -20,8 +20,13 @@ export default function Login() {
       await login(formData.email, formData.password);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Invalid email or password");
+      setError(err.message || "Invalid email or password");
     }
+  };
+
+  const handleGoogleLogin = () => {
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   return (
@@ -98,6 +103,26 @@ export default function Login() {
               {!isLoading && <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />}
             </Button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-card/80 px-3 text-xs text-muted-foreground uppercase tracking-wider">or continue with</span>
+            </div>
+          </div>
+
+          {/* Google OAuth */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full h-11 flex items-center justify-center gap-3 rounded-lg border bg-background hover:bg-secondary transition-colors text-sm font-medium"
+          >
+            <Chrome className="h-4 w-4 text-blue-500" />
+            Sign in with Google
+          </button>
 
           <div className="mt-8 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}

@@ -17,10 +17,10 @@ export default function Register() {
     e.preventDefault();
     setError(null);
     try {
-      await register(formData);
+      await register(formData.name, formData.email, formData.password);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Something went wrong");
+      setError(err.message || "Something went wrong. Please try again.");
     }
   };
 

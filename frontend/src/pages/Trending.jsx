@@ -1,12 +1,13 @@
 import useBlogs from "../hooks/useBlogs";
 import BlogFeed from "../components/blog/BlogFeed";
-import { TrendingUp, Flame } from "lucide-react";
+import { Flame } from "lucide-react";
+import useDocumentTitle from "../hooks/useDocumentTitle";
 
 export default function Trending() {
-  const { blogs, loading } = useBlogs("trending");
-
-  // In a real app the API would return these sorted by trending score
-  const trendingBlogs = [...blogs].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+  useDocumentTitle("Trending");
+  // useBlogs("trending") hits /recommendation/trending which the backend already
+  // sorts by (likedBy + history count), so no extra client-side sort needed.
+  const { blogs, loading, error, refresh } = useBlogs("trending");
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -23,11 +24,21 @@ export default function Trending() {
       </header>
 
       <div className="min-h-[500px]">
-        {loading ? (
+        {error ? (
+          <div className="text-center py-20 border rounded-xl bg-destructive/5">
+            <p className="text-destructive mb-4">{error}</p>
+            <button
+              onClick={refresh}
+              className="px-4 py-2 bg-background border rounded-lg hover:bg-secondary transition-colors text-sm"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : loading ? (
           <BlogFeed loading={true} />
         ) : (
           <div className="space-y-6">
-            {trendingBlogs.map((blog, index) => (
+            {blogs.map((blog, index) => (
               <div key={blog.id} className="relative group">
                 {/* Ranking number */}
                 <span className="absolute -left-12 top-4 text-3xl font-extrabold text-muted-foreground/30 group-hover:text-primary/50 transition-colors hidden md:block">

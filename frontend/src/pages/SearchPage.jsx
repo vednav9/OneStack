@@ -1,23 +1,44 @@
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search as SearchIcon } from "lucide-react";
+import { Search as SearchIcon, Loader2 } from "lucide-react";
 import BlogFeed from "../components/blog/BlogFeed";
-import useBlogs from "../hooks/useBlogs";
 import SearchBar from "../components/search/SearchBar";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+import { searchBlogs } from "../services/searchService";
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const { blogs, loading } = useBlogs();
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Simple simulated search across title, description, company, and tags
-  const lowercaseQuery = query.toLowerCase();
-  const results = blogs.filter(
-    (b) =>
-      b.title?.toLowerCase().includes(lowercaseQuery) ||
-      b.company?.toLowerCase().includes(lowercaseQuery) ||
-      b.tags?.some((t) => t.toLowerCase().includes(lowercaseQuery)) ||
-      b.description?.toLowerCase().includes(lowercaseQuery)
-  );
+  useDocumentTitle(query ? `Search: ${query}` : "Search");
+
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    searchBlogs(query)
+      .then((data) => {
+        if (!cancelled) {
+          // Normalize — backend returns raw rows from raw query
+          const blogs = Array.isArray(data) ? data : data?.results || [];
+          setResults(blogs);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message || "Search failed.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [query]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -26,31 +47,36 @@ export default function SearchPage() {
           <div className="w-full max-w-2xl">
             <SearchBar initialQuery={query} autoFocus className="mb-2" />
           </div>
-          
+
           <div className="flex items-center gap-2">
             <SearchIcon className="h-5 w-5 text-muted-foreground" />
             <h1 className="text-2xl font-bold tracking-tight">
-              {query ? `Search results for "${query}"` : "Search BlogSphere"}
+              {query ? `Results for "${query}"` : "Search BlogSphere"}
             </h1>
+            {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground ml-2" />}
           </div>
-          
-          {query && (
+
+          {query && !loading && (
             <p className="text-muted-foreground">
-              Found {results.length} related engineering {results.length === 1 ? 'blog' : 'blogs'}.
+              Found {results.length} engineering {results.length === 1 ? "blog" : "blogs"}.
             </p>
           )}
         </div>
       </header>
 
       <div className="min-h-[500px]">
-        {loading ? (
+        {error ? (
+          <p className="text-destructive text-sm">{error}</p>
+        ) : loading ? (
           <BlogFeed loading={true} />
         ) : query ? (
           <BlogFeed blogs={results} loading={false} />
         ) : (
           <div className="text-center py-20 text-muted-foreground max-w-sm mx-auto">
             <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg">Enter a keyword to search through thousands of engineering blogs, system architectures, and technical deep-dives.</p>
+            <p className="text-lg">
+              Enter a keyword to search through thousands of engineering blogs, system architectures, and technical deep-dives.
+            </p>
           </div>
         )}
       </div>

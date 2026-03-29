@@ -3,22 +3,29 @@ import useBlogs from "../hooks/useBlogs";
 import BlogFeed from "../components/blog/BlogFeed";
 import Filters from "../components/search/Filters";
 import { useAuthStore } from "../store/authStore";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+
+// Map tab IDs to the useBlogs() endpoint type
+const TAB_CONFIG = [
+  { id: "all",       label: "For You",   endpoint: "all" },
+  { id: "trending",  label: "Trending",  endpoint: "trending" },
+  { id: "following", label: "Following", endpoint: "feed", requiresAuth: true },
+];
 
 export default function Home() {
   const { user } = useAuthStore();
-  const { blogs, loading, error, refresh } = useBlogs();
-  const [activeTab, setActiveTab] = useState("for_you");
+  useDocumentTitle("Home");
+  const [activeTab, setActiveTab] = useState("all");
   const [activeFilter, setActiveFilter] = useState("");
 
-  const tabs = [
-    { id: "for_you", label: "For You" },
-    { id: "following", label: "Following" },
-  ];
+  const currentTab = TAB_CONFIG.find((t) => t.id === activeTab) || TAB_CONFIG[0];
 
-  // Filtering demo
-  const filteredBlogs = React.useMemo(() => {
+  // Fetch blogs based on selected tab's endpoint
+  const { blogs, loading, error, refresh } = useBlogs(currentTab.endpoint);
+
+  const filteredBlogs = useMemo(() => {
     if (!activeFilter) return blogs;
-    return blogs.filter((b) => 
+    return blogs.filter((b) =>
       b.tags?.some((t) => t.toLowerCase() === activeFilter.toLowerCase())
     );
   }, [blogs, activeFilter]);
@@ -28,30 +35,39 @@ export default function Home() {
       {/* Header section */}
       <div className="border-b pb-4">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-6">
-          {user ? `Welcome back, ${user.name?.split(" ")[0] || user.username}` : "Discover Engineering"}
+          {user
+            ? `Welcome back, ${user.name?.split(" ")[0] || "there"} 👋`
+            : "Discover Engineering"}
         </h1>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`text-sm font-medium transition-colors hover:text-foreground focus:outline-none pb-4 -mb-[17px] border-b-2 ${
-                  activeTab === tab.id
-                    ? "text-foreground border-primary"
-                    : "text-muted-foreground border-transparent hover:border-border"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {TAB_CONFIG.map((tab) => {
+              // Hide auth-required tabs for guests
+              if (tab.requiresAuth && !user) return null;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setActiveFilter(""); // reset filter on tab switch
+                  }}
+                  className={`text-sm font-medium transition-colors hover:text-foreground focus:outline-none pb-4 -mb-[17px] border-b-2 ${
+                    activeTab === tab.id
+                      ? "text-foreground border-primary"
+                      : "text-muted-foreground border-transparent hover:border-border"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Filters (only show on "for you" tab) */}
-      {activeTab === "for_you" && (
+      {/* Filters (only on "all" / For You tab) */}
+      {activeTab === "all" && (
         <Filters activeFilter={activeFilter} onFilterChange={setActiveFilter} />
       )}
 
@@ -62,7 +78,7 @@ export default function Home() {
             <p className="text-destructive mb-4 font-medium">{error}</p>
             <button
               onClick={refresh}
-              className="px-4 py-2 bg-background border rounded-lg hover:bg-secondary transition-colors"
+              className="px-4 py-2 bg-background border rounded-lg hover:bg-secondary transition-colors text-sm"
             >
               Try Again
             </button>
