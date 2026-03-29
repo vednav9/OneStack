@@ -47,6 +47,7 @@ model Blog {
   sourceURL String @unique
   sourceSite String
   author String?
+  publishedAt DateTime?
   readTime Int?
   thumbnail String?
   createdAt DateTime @default(now())
