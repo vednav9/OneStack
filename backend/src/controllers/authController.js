@@ -17,6 +17,8 @@ export async function register(req, res) {
         const accessToken = generateAccessToken(user.id);
         const refreshToken = generateRefreshToken(user.id);
 
+        await saveRefreshToken(user.id, refreshToken);
+
         res.json({
             accessToken,
             refreshToken,
@@ -43,7 +45,7 @@ export async function login(req, res) {
         const accessToken = generateAccessToken(user.id);
         const refreshToken = generateRefreshToken(user.id);
 
-        await saveRefreshToken(user.id, token);
+        await saveRefreshToken(user.id, refreshToken);
 
         res.json({
             accessToken,
