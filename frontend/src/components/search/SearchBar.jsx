@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "../../utils/cn";
@@ -17,9 +17,20 @@ export default function SearchBar({ className, initialQuery = "", autoFocus = fa
 
   const clearSearch = () => {
     setQuery("");
-    // Optionally focus input again
     document.getElementById("search-input-field")?.focus();
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // CMD + K or CTRL + K
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        document.getElementById("search-input-field")?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <form
@@ -55,6 +66,13 @@ export default function SearchBar({ className, initialQuery = "", autoFocus = fa
           isFocused ? "border-primary" : "border-border"
         )}
       />
+
+      {!query && !isFocused && (
+        <div className="absolute right-4 hidden sm:flex items-center gap-1 opacity-50 pointer-events-none">
+          <kbd className="px-1.5 py-0.5 text-[10px] font-sans font-semibold border rounded-md shadow-[0_2px_0_0_rgba(0,0,0,0.1)] dark:shadow-[0_2px_0_0_rgba(255,255,255,0.1)] bg-background">⌘</kbd>
+          <kbd className="px-1.5 py-0.5 text-[10px] font-sans font-semibold border rounded-md shadow-[0_2px_0_0_rgba(0,0,0,0.1)] dark:shadow-[0_2px_0_0_rgba(255,255,255,0.1)] bg-background">K</kbd>
+        </div>
+      )}
 
       {query && (
         <button
