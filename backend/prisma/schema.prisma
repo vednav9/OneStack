@@ -32,7 +32,7 @@ model User {
 
 model RefreshToken {
   id String @id @default(uuid())
-  token String?
+  token String @unique
   userId String
   createdAt DateTime @default(now())
 
@@ -44,7 +44,7 @@ model Blog {
   title String
   description String?
   content String?
-  sourceURL String
+  sourceURL String @unique
   sourceSite String
   author String?
   readTime Int?
@@ -85,6 +85,8 @@ model SavedBlog {
 
   user User @relation(fields: [userId], references: [id])
   blog Blog @relation(fields: [blogId], references: [id])
+
+  @@unique([userId, blogId])
 }
 
 model LikedBlog {
@@ -94,6 +96,8 @@ model LikedBlog {
 
   user User @relation(fields: [userId], references: [id])
   blog Blog @relation(fields: [blogId], references: [id])
+
+  @@unique([userId, blogId])
 }
 
 model ReadingHistory {
