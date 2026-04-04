@@ -1,14 +1,14 @@
-# 🚀 BlogSphere
+# 🚀 OneStack
 
 **Unified Discovery Platform for Real-World Engineering Blogs**
 
-BlogSphere is a developer-first platform that continuously aggregates production-grade engineering blogs from top tech companies and makes them searchable, comparable, and discussable in one place.
+OneStack is a developer-first platform that continuously aggregates production-grade engineering blogs from top tech companies and makes them searchable, comparable, and discussable in one place.
 
 It focuses on **how real systems are built in production**, not tutorials.
 
 ---
 
-## 🧠 Why BlogSphere?
+## 🧠 Why OneStack?
 
 Engineering insights are scattered across:
 
@@ -22,7 +22,7 @@ Developers often search things like:
 * *“rate limiting Uber”*
 * *“distributed cache Netflix”*
 
-BlogSphere solves this by:
+OneStack solves this by:
 
 * Automatically ingesting new engineering blogs
 * Enabling keyword + semantic search
@@ -341,15 +341,15 @@ This project demonstrates:
 
 **Resume Bullet Example**
 
-> Built BlogSphere, a production-grade engineering blog discovery platform with automated ingestion, semantic search, and recommendation systems aggregating real-world system design blogs.
+> Built OneStack, a production-grade engineering blog discovery platform with automated ingestion, semantic search, and recommendation systems aggregating real-world system design blogs.
 
 ---
 
 ## 🧪 Local Setup
 
 ```bash
-git clone https://github.com/your-username/BlogSphere
-cd BlogSphere
+git clone https://github.com/your-username/OneStack
+cd OneStack
 docker-compose up
 ```
 
@@ -364,5 +364,5 @@ Please open an issue before major changes.
 
 ## ⭐ Final Note
 
-**BlogSphere is designed as a real system, not a toy project.**
+**OneStack is designed as a real system, not a toy project.**
 It reflects how large-scale content aggregation, search, and recommendation platforms work in production.
