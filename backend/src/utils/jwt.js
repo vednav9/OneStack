@@ -1,22 +1,22 @@
 import jwt from "jsonwebtoken";
-import {env} from "../config/env.js";
+import crypto from "crypto";
 
 export function generateAccessToken(userId) {
     return jwt.sign(
         {userId},
-        env.jwtSecret,
+        process.env.jwtSecret,
         {expiresIn:"15m"}
     );
 }
 
 export function generateRefreshToken(userId) {
     return jwt.sign(
-        {userId},
-        env.jwtRefreshSecret,
+        { userId, jti: crypto.randomUUID() },
+        process.env.jwtRefreshSecret,
         {expiresIn:"7d"}
     );
 }
 
 export function verifyAccessToken(token){
-    return jwt.verify(token, env.jwtSecret);
+    return jwt.verify(token, process.env.jwtSecret);
 }
