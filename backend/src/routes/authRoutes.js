@@ -4,9 +4,10 @@ import passport from "passport";
 import { register, login, refresh, logout } from "../controllers/authController.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
 import { saveRefreshToken, deleteRefreshTokensByUserId } from "../services/authServices.js";
+import { env } from "../config/env.js";
 
 const router = express.Router();
-const frontendUrl = process.env.frontendUrl.replace(/\/$/, "");
+const frontendUrl = (env.frontendUrl || "http://localhost:5173").replace(/\/$/, "");
 
 router.post("/register", register);
 router.post("/login", login);
