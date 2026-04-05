@@ -14,14 +14,32 @@ export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    if (token) {
-      loginWithGoogle(token).then(() => navigate("/", { replace: true }));
-    } else {
-      // No token => something went wrong, go to login
-      navigate("/login", { replace: true });
+    let cancelled = false;
+
+    async function completeOAuthLogin() {
+      const hashParams = new URLSearchParams(window.location.hash.startsWith("#") ? window.location.hash.slice(1) : "");
+      const token = hashParams.get("token") || searchParams.get("token");
+      const refreshToken = hashParams.get("refreshToken") || searchParams.get("refreshToken");
+
+      if (!token) {
+        if (!cancelled) navigate("/login?error=oauth_missing_token", { replace: true });
+        return;
+      }
+
+      try {
+        await loginWithGoogle(token, refreshToken);
+        if (!cancelled) navigate("/", { replace: true });
+      } catch {
+        if (!cancelled) navigate("/login?error=oauth_failed", { replace: true });
+      }
     }
-  }, []);
+
+    completeOAuthLogin();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, loginWithGoogle, navigate]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-background animate-fade-in">
