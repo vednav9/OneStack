@@ -10,6 +10,7 @@ import {
     findRefreshToken,
 } from "../services/authServices.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
+import { env } from "../config/env.js";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -139,7 +140,7 @@ export async function refresh(req, res) {
             return res.status(403).json({ error: "Invalid token" });
         }
 
-        const decoded = jwt.verify(refreshToken, process.env.jwtRefreshSecret);
+        const decoded = jwt.verify(refreshToken, env.jwtRefreshSecret);
 
         if (storedToken.userId !== decoded.userId) {
             return res.status(403).json({ error: "Invalid token" });
