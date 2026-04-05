@@ -2,9 +2,11 @@ import express from "express";
 import passport from "passport";
 
 import { register, login, refresh, logout } from "../controllers/authController.js";
-import { generateAccessToken } from "../utils/jwt.js";
+import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
+import { saveRefreshToken, deleteRefreshTokensByUserId } from "../services/authServices.js";
 
 const router = express.Router();
+const frontendUrl = process.env.frontendUrl.replace(/\/$/, "");
 
 router.post("/register", register);
 router.post("/login", login);
@@ -19,10 +21,28 @@ router.get(
 
 router.get(
     "/google/callback",
-    passport.authenticate("google", { session: false }),
-    (req, res) => {
-        const token = generateAccessToken(req.user.id);
-        res.redirect(`http://localhost:5173/auth?token=${token}`);
+    passport.authenticate("google", {
+        session: false,
+        failureRedirect: `${frontendUrl}/login?error=oauth_failed`,
+    }),
+    async (req, res) => {
+        try {
+            if (!req.user?.id) {
+                return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+            }
+
+            const accessToken = generateAccessToken(req.user.id);
+            const refreshToken = generateRefreshToken(req.user.id);
+
+            await deleteRefreshTokensByUserId(req.user.id);
+            await saveRefreshToken(req.user.id, refreshToken);
+
+            const redirectUrl = `${frontendUrl}/auth#token=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`;
+
+            res.redirect(redirectUrl);
+        } catch {
+            res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+        }
     },
 );
 
