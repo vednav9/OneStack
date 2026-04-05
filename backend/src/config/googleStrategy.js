@@ -10,7 +10,12 @@ passport.use(
             callbackURL: "/api/auth/google/callback",
         },
         async (accessToken, refreshToken, profile, done) => {
-            const email = profile.emails[0].value;
+            const email = profile?.emails?.[0]?.value?.trim().toLowerCase();
+            if (!email) {
+                return done(new Error("Google account does not provide email"));
+            }
+
+            const userPhoto = profile?.photos?.[0]?.value || null;
 
             let user = await prisma.user.findUnique({
                 where: { email },
@@ -22,6 +27,16 @@ passport.use(
                         email,
                         name: profile.displayName,
                         googleId: profile.id,
+                        userPhoto,
+                    },
+                });
+            } else {
+                user = await prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                        googleId: user.googleId || profile.id,
+                        userPhoto: userPhoto || user.userPhoto,
+                        name: user.name || profile.displayName,
                     },
                 });
             }
