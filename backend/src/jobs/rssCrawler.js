@@ -3,6 +3,7 @@ import { crawlQueue } from "../queues/crawlQueue.js";
 import { fileURLToPath } from "url";
 
 const parser = new Parser();
+const MAX_ITEMS_PER_FEED = 30;
 
 const feeds = [
     "https://openai.com/blog/rss.xml",
@@ -18,14 +19,20 @@ export async function runCrawler() {
         console.log(`Crawling ${feed}...`);
         try {
             const data = await parser.parseURL(feed);
-            console.log(`Found ${data.items.length} items in ${feed}`);
+            const items = (data.items || []).slice(0, MAX_ITEMS_PER_FEED);
+            console.log(`Found ${data.items.length} items in ${feed} (processing ${items.length})`);
 
-            for (const item of data.items) {
+            for (const item of items) {
+                if (!item?.link || !item?.title) continue;
+
                 await crawlQueue.add("crawlBlog", {
                     url: item.link,
                     title: item.title,
                     publishedAt: item.isoDate || item.pubDate || null,
                     author: item.creator || item["dc:creator"] || item.author || null,
+                }, {
+                    // De-duplicate at queue level across repeated crawler runs.
+                    jobId: item.link,
                 });
             }
             console.log(`Added items from ${feed} to queue.`);
