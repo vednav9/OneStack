@@ -10,6 +10,19 @@ export function getBlog(id) {
     return apiRequest(`/blogs/${id}`);
 }
 
+export function getBlogSummary(id) {
+    return apiRequest(`/blogs/${id}/summary`);
+}
+
+export function getBlogEmbedStatus(id) {
+    return apiRequest(`/blogs/${id}/embed-status`);
+}
+
+// Fetch fresh server-side rendered content (proxy — avoids iframe blocking)
+export function getBlogContent(id) {
+    return apiRequest(`/blogs/${id}/content`);
+}
+
 // Toggle save — POST to save, DELETE to unsave
 export function saveBlog(id) {
     return apiRequest(`/blogs/${id}/save`, { method: "POST" });
