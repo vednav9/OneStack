@@ -115,7 +115,7 @@ Blog Sources (RSS / Sitemap / HTML)
 
 * **Meilisearch / OpenSearch** – keyword search
 * **Qdrant / Pinecone** – vector similarity search
-* **Sentence Transformers / OpenAI** – embeddings
+* **Sentence Transformers / Gemini** – embeddings
 
 ---
 
