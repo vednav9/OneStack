@@ -125,10 +125,10 @@ export default function BlogHeader({ blog }) {
       </div>
 
       {/* Cover image */}
-      {blog.coverImage && (
-        <div className="aspect-video relative rounded-xl overflow-hidden border">
+      {(blog.coverImage || blog.thumbnail) && (
+        <div className="aspect-video relative rounded-xl overflow-hidden border shadow-sm">
           <img
-            src={blog.coverImage}
+            src={blog.coverImage || blog.thumbnail}
             alt={blog.title}
             className="object-cover w-full h-full"
             loading="eager"
