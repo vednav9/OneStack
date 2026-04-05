@@ -11,7 +11,6 @@ export default function LeftSidebar() {
     { name: "Home", icon: Home, path: "/", end: true },
     { name: "Explore", icon: Compass, path: "/explore" },
     { name: "Trending", icon: TrendingUp, path: "/trending" },
-    { name: "Topics", icon: Hash, path: "/explore" },
     { name: "Saved", icon: Bookmark, path: "/saved" },
     { name: "History", icon: Clock, path: "/history" },
     { name: "Lists", icon: List, path: "/lists" },
