@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
 import passport from "passport";
-
 import { env } from "./src/config/env.js";
+
 import logger from "./src/utils/logger.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 import requestLogger from "./src/middlewares/requestLogger.js";
