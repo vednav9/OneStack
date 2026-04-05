@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -10,6 +10,19 @@ export default function Login() {
   const [error, setError] = useState(null);
   const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const oauthError = searchParams.get("error");
+    if (oauthError === "oauth_failed") {
+      setError("Google sign in failed. Please try again.");
+      return;
+    }
+    if (oauthError === "oauth_missing_token") {
+      setError("Google sign in was interrupted. Please try again.");
+      return;
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -18,7 +31,11 @@ export default function Login() {
     setError(null);
     try {
       await login(formData.email, formData.password);
-      navigate("/");
+      const requestedPath = searchParams.get("next");
+      const safeNext = requestedPath && requestedPath.startsWith("/") && !requestedPath.startsWith("//")
+        ? requestedPath
+        : "/";
+      navigate(safeNext, { replace: true });
     } catch (err) {
       setError(err.message || "Invalid email or password");
     }
