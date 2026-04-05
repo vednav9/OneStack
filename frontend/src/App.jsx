@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
@@ -28,6 +28,18 @@ function ScrollToTop() {
   return null;
 }
 
+function RequireAuth({ children }) {
+  const { token } = useAuthStore();
+  const location = useLocation();
+
+  if (!token) {
+    const nextPath = `${location.pathname}${location.search}${location.hash}`;
+    return <Navigate to={`/login?next=${encodeURIComponent(nextPath)}`} replace />;
+  }
+
+  return children;
+}
+
 export default function App() {
   const { token, fetchUser, user } = useAuthStore();
 
@@ -51,13 +63,13 @@ export default function App() {
           <Route path="/blog/:id" element={<BlogPage />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/trending" element={<Trending />} />
-          <Route path="/saved" element={<SavedBlogs />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/lists" element={<Lists />} />
-          <Route path="/profile/:username" element={<Profile />} />
+          <Route path="/saved" element={<RequireAuth><SavedBlogs /></RequireAuth>} />
+          <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
+          <Route path="/lists" element={<RequireAuth><Lists /></RequireAuth>} />
+          <Route path="/profile/:username" element={<RequireAuth><Profile /></RequireAuth>} />
           <Route path="/topic/:topic" element={<TopicPage />} />
           <Route path="/search" element={<SearchPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<RequireAuth><AdminDashboard /></RequireAuth>} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
