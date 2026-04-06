@@ -134,6 +134,75 @@ function stripHtml(html) {
         .trim();
 }
 
+function splitIntoSentences(text = "") {
+    return String(text)
+        .replace(/\s+/g, " ")
+        .match(/[^.!?]+[.!?]+|[^.!?]+$/g)
+        ?.map((s) => s.trim())
+        .filter((s) => s.length > 20) || [];
+}
+
+function truncateWords(text = "", maxWords = 15) {
+    const words = String(text).trim().split(/\s+/).filter(Boolean);
+    if (words.length <= maxWords) return words.join(" ");
+    return `${words.slice(0, maxWords).join(" ")}...`;
+}
+
+function buildFallbackSummary(blog, plainContent) {
+    const combined = [blog.title, blog.description, plainContent]
+        .filter(Boolean)
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    const sentences = splitIntoSentences(combined);
+    const tldrSentence = sentences[0] || blog.description || `This article discusses ${blog.title}.`;
+    const paragraph = sentences.slice(0, 3).join(" ") || tldrSentence;
+
+    const keyPoints = sentences
+        .slice(0, 8)
+        .map((s) => truncateWords(s, 15));
+
+    const takeaways = (keyPoints.length ? keyPoints : [tldrSentence])
+        .slice(0, 5)
+        .map((s) => truncateWords(s, 12));
+
+    return {
+        tldr: truncateWords(tldrSentence, 24),
+        shortParagraph: paragraph,
+        keyPoints,
+        takeaways,
+        source: blog.sourceSite || null,
+        generatedBy: "fallback",
+    };
+}
+
+function getGeminiModelCandidates(primaryModel) {
+    const candidates = [
+        primaryModel,
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-flash",
+    ].filter(Boolean);
+
+    return [...new Set(candidates)];
+}
+
+function cleanGeminiJson(raw = "") {
+    let value = String(raw || "").trim();
+    if (!value) return "{}";
+
+    if (value.startsWith("```")) {
+        value = value
+            .replace(/^```(?:json)?\s*/i, "")
+            .replace(/\s*```$/, "")
+            .trim();
+    }
+
+    return value;
+}
+
 export async function getBlogSummaryById(id) {
     const blog = await prisma.blog.findUnique({
         where: { id },
@@ -159,20 +228,15 @@ export async function getBlogSummaryById(id) {
 
     // Strip HTML from content for cleaner AI input
     const plainContent = stripHtml(blog.content || "");
+    const fallbackSummary = buildFallbackSummary(blog, plainContent);
+
     const text = [blog.title, blog.description, plainContent]
         .filter(Boolean)
         .join("\n\n")
         .slice(0, 14000);
 
     if (!env.geminiApiKey) {
-        return {
-            tldr: blog.description || "Summary unavailable.",
-            keyPoints: [],
-            takeaways: [],
-            shortParagraph: blog.description || "",
-            source: blog.sourceSite || null,
-            generatedBy: "fallback",
-        };
+        return fallbackSummary;
     }
 
     const prompt = [
@@ -188,51 +252,65 @@ export async function getBlogSummaryById(id) {
         text,
     ].join("\n");
 
-    const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(env.geminiModel)}:generateContent?key=${encodeURIComponent(env.geminiApiKey)}`,
-        {
-            contents: [
+    let parsed = null;
+    let lastProviderError = null;
+    const geminiModels = getGeminiModelCandidates(env.geminiModel);
+
+    for (const model of geminiModels) {
+        try {
+            const response = await axios.post(
+                `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(env.geminiApiKey)}`,
                 {
-                    role: "user",
-                    parts: [{ text: prompt }],
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [{ text: prompt }],
+                        },
+                    ],
+                    generationConfig: {
+                        temperature: 0.2,
+                        responseMimeType: "application/json",
+                    },
                 },
-            ],
-            generationConfig: {
-                temperature: 0.2,
-                responseMimeType: "application/json",
-            },
-        },
-        {
-            headers: {
-                "Content-Type": "application/json",
-            },
-            timeout: 25000,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    timeout: 25000,
+                }
+            );
+
+            const raw = cleanGeminiJson(response?.data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}");
+            const json = JSON.parse(raw);
+            if (json && typeof json === "object") {
+                parsed = json;
+                break;
+            }
+        } catch (error) {
+            lastProviderError = error;
         }
-    );
-
-    let raw = response?.data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    if (raw.startsWith("```")) {
-        raw = raw
-            .replace(/^```(?:json)?\s*/i, "")
-            .replace(/\s*```$/, "")
-            .trim();
     }
 
-    let parsed;
-    try {
-        parsed = JSON.parse(raw);
-    } catch {
-        parsed = {};
-    }
+    const result = parsed
+        ? {
+            tldr: typeof parsed.tldr === "string" && parsed.tldr.trim() ? parsed.tldr : fallbackSummary.tldr,
+            shortParagraph: typeof parsed.shortParagraph === "string" && parsed.shortParagraph.trim() ? parsed.shortParagraph : fallbackSummary.shortParagraph,
+            keyPoints: Array.isArray(parsed.keyPoints) && parsed.keyPoints.length
+                ? parsed.keyPoints.filter(Boolean).slice(0, 10)
+                : fallbackSummary.keyPoints,
+            takeaways: Array.isArray(parsed.takeaways) && parsed.takeaways.length
+                ? parsed.takeaways.filter(Boolean).slice(0, 5)
+                : fallbackSummary.takeaways,
+            source: blog.sourceSite || null,
+            generatedBy: "gemini",
+        }
+        : fallbackSummary;
 
-    const result = {
-        tldr: typeof parsed.tldr === "string" ? parsed.tldr : blog.description || "",
-        shortParagraph: typeof parsed.shortParagraph === "string" ? parsed.shortParagraph : "",
-        keyPoints: Array.isArray(parsed.keyPoints) ? parsed.keyPoints.filter(Boolean).slice(0, 10) : [],
-        takeaways: Array.isArray(parsed.takeaways) ? parsed.takeaways.filter(Boolean).slice(0, 5) : [],
-        source: blog.sourceSite || null,
-        generatedBy: "gemini",
-    };
+    if (!parsed && lastProviderError) {
+        const status = lastProviderError?.response?.status;
+        const message = lastProviderError?.response?.data?.error?.message || lastProviderError.message;
+        console.warn(`[summary] Gemini unavailable (status=${status || "NA"}): ${message}`);
+    }
 
     // Cache the result
     try {
