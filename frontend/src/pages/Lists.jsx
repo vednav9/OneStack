@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
-import { List as ListIcon, Plus, Trash2, Lock, Globe, Loader2 } from "lucide-react";
+import { List as ListIcon, Plus, Trash2, Lock, Loader2 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import EmptyState from "../components/ui/EmptyState";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "../components/ui/Card";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import { useAuthStore } from "../store/authStore";
 import { getLists, createList, deleteList } from "../services/listService";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Lists() {
   useDocumentTitle("My Lists");
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -37,7 +38,8 @@ export default function Lists() {
     setCreating(true);
     try {
       const created = await createList(newListName.trim());
-      setLists((prev) => [{ ...created, count: 0, blogs: [] }, ...prev]);
+      const newList = { ...created, count: 0, blogs: [], isDefault: false };
+      setLists((prev) => [newList, ...prev]);
       setNewListName("");
       setShowInput(false);
     } catch (err) {
@@ -48,12 +50,22 @@ export default function Lists() {
   }
 
   async function handleDelete(id) {
+    if (String(id).startsWith("default-")) {
+      return;
+    }
+
     try {
       await deleteList(id);
       setLists((prev) => prev.filter((l) => l.id !== id));
     } catch (err) {
       setError(err.message);
     }
+  }
+
+  function getListPath(list) {
+    if (list.id === "default-saved") return "/saved";
+    if (list.id === "default-like") return "/like";
+    return `/lists/${list.id}`;
   }
 
   return (
@@ -129,6 +141,7 @@ export default function Lists() {
           {lists.map((list) => (
             <Card
               key={list.id}
+              onClick={() => navigate(getListPath(list))}
               className="hover:border-primary/50 transition-colors cursor-pointer group h-[180px] flex flex-col relative overflow-hidden"
             >
               {/* Gradient top bar */}
@@ -137,19 +150,26 @@ export default function Lists() {
               <CardHeader className="flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <span className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                    <Lock className="h-3 w-3" /> Private
+                    <Lock className="h-3 w-3" /> {list.isDefault ? "Default" : "Private"}
                   </span>
-                  <button
-                    onClick={() => handleDelete(list.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
-                    title="Delete list"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  {!list.isDefault && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(list.id);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+                      title="Delete list"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
                 <CardTitle className="group-hover:text-primary transition-colors">{list.name}</CardTitle>
                 <CardDescription className="mt-2 line-clamp-2">
-                  A curated collection of engineering blogs about {list.name.toLowerCase()}.
+                  {list.isDefault
+                    ? `Auto-generated from your ${list.name.toLowerCase()} blogs.`
+                    : `A curated collection of engineering blogs about ${list.name.toLowerCase()}.`}
                 </CardDescription>
               </CardHeader>
               <CardFooter className="py-4 border-t bg-secondary/20">
