@@ -9,8 +9,10 @@ import AuthCallback from "./pages/AuthCallback";
 import Explore from "./pages/Explore";
 import Trending from "./pages/Trending";
 import SavedBlogs from "./pages/SavedBlogs";
+import LikedBlogs from "./pages/LikedBlogs";
 import History from "./pages/History";
 import Lists from "./pages/Lists";
+import ListDetail from "./pages/ListDetail";
 import Profile from "./pages/Profile";
 import TopicPage from "./pages/TopicPage";
 import SearchPage from "./pages/SearchPage";
@@ -63,9 +65,11 @@ export default function App() {
           <Route path="/blog/:id" element={<BlogPage />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/trending" element={<Trending />} />
+          <Route path="/like" element={<RequireAuth><LikedBlogs /></RequireAuth>} />
           <Route path="/saved" element={<RequireAuth><SavedBlogs /></RequireAuth>} />
           <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
           <Route path="/lists" element={<RequireAuth><Lists /></RequireAuth>} />
+          <Route path="/lists/:listId" element={<RequireAuth><ListDetail /></RequireAuth>} />
           <Route path="/profile/:username" element={<RequireAuth><Profile /></RequireAuth>} />
           <Route path="/topic/:topic" element={<TopicPage />} />
           <Route path="/search" element={<SearchPage />} />
