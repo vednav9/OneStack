@@ -4,6 +4,7 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import prisma from "../config/db.js";
 import { generateTags } from "../utils/tagGenerator.js";
+import { summarizeNetworkError, withNetworkRetry } from "../utils/network.js";
 
 /**
  * Extracts structured HTML content from a loaded cheerio document.
@@ -161,19 +162,22 @@ function escapeHtml(str) {
         .replace(/"/g, "&quot;");
 }
 
-new Worker(
+const crawlWorker = new Worker(
     "crawl",
     async (job) => {
         const { url, title, publishedAt, author } = job.data;
 
-        const { data } = await axios.get(url, {
-            timeout: 15000,
-            headers: {
-                "User-Agent":
-                    "Mozilla/5.0 (compatible; BlogSphereBot/1.0; +https://blogsphere.app/bot)",
-                Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            },
-        });
+        const { data } = await withNetworkRetry(
+            () => axios.get(url, {
+                timeout: 15000,
+                headers: {
+                    "User-Agent":
+                        "Mozilla/5.0 (compatible; BlogSphereBot/1.0; +https://blogsphere.app/bot)",
+                    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                },
+            }),
+            { attempts: 3, initialDelayMs: 350, maxDelayMs: 2000 }
+        );
 
         const $ = cheerio.load(data);
 
@@ -240,3 +244,13 @@ new Worker(
     },
     { connection }
 );
+
+crawlWorker.on("failed", (job, error) => {
+    console.warn(
+        `[crawl-worker] Job ${job?.id || "unknown"} failed: ${summarizeNetworkError(error)}`
+    );
+});
+
+crawlWorker.on("error", (error) => {
+    console.warn(`[crawl-worker] ${summarizeNetworkError(error)}`);
+});
