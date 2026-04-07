@@ -15,8 +15,11 @@ import recommendationRoutes from "./src/routes/recommendationRoutes.js";
 import tagRoutes from "./src/routes/tagRoutes.js";
 import listRoutes from "./src/routes/listRoutes.js";
 import "./src/config/googleStrategy.js";
-import "./src/jobs/blogParser.js";
-import "./src/jobs/scheduler.js";
+
+if (!process.env.VERCEL) {
+  await import("./src/jobs/blogParser.js");
+  await import("./src/jobs/scheduler.js");
+}
 
 const app = express();
 
