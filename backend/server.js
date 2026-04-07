@@ -20,9 +20,14 @@ import "./src/jobs/scheduler.js";
 
 const app = express();
 
+const allowedOrigins = (env.frontendUrl)
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
-    credentials: true,
+    origin: allowedOrigins,
+    credentials: true, // lets cookies & auth headers pass.
 }));
 app.use(express.json());
 app.use(requestLogger);
