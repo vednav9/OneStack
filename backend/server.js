@@ -42,6 +42,10 @@ app.use(express.json());
 app.use(requestLogger);
 app.use(passport.initialize());
 
+// Silence favicon requests from crawlers (e.g. Vercel's vercel-favicon/1.0)
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+app.get("/favicon.png", (req, res) => res.status(204).end());
+
 app.get("/", (req, res) => {
     res.json({ message: "API is running" });
 });
