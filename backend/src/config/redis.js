@@ -5,54 +5,60 @@ dotenv.config();
 
 const redisUrl = process.env.REDIS_URL;
 
+// Gracefully handle missing REDIS_URL instead of crashing the entire server.
+// Services already wrap redis calls in try-catch, so a null export is safe.
 if (!redisUrl) {
-    throw new Error("REDIS_URL is not set");
+    console.warn("[redis] REDIS_URL is not set – Redis caching is disabled.");
 }
 
-const tlsEnv = (process.env.REDIS_TLS || "auto").toLowerCase();
-const isRedissUrl = redisUrl.startsWith("rediss://");
+let connection = null;
 
-let useTls = isRedissUrl;
-if (tlsEnv === "true") useTls = true;
-if (tlsEnv === "false") useTls = false;
+if (redisUrl) {
+    const tlsEnv = (process.env.REDIS_TLS || "auto").toLowerCase();
+    const isRedissUrl = redisUrl.startsWith("rediss://");
 
-const normalizedRedisUrl = useTls
-    ? redisUrl.replace(/^redis:\/\//, "rediss://")
-    : redisUrl.replace(/^rediss:\/\//, "redis://");
+    let useTls = isRedissUrl;
+    if (tlsEnv === "true") useTls = true;
+    if (tlsEnv === "false") useTls = false;
 
-const options = {
-    maxRetriesPerRequest: null,
-    retryStrategy: () => null,
-    reconnectOnError: () => false,
-};
+    const normalizedRedisUrl = useTls
+        ? redisUrl.replace(/^redis:\/\//, "rediss://")
+        : redisUrl.replace(/^rediss:\/\//, "redis://");
 
-// Allow explicit overrides while still using URL auth by default.
-if (process.env.REDIS_USERNAME) {
-    options.username = process.env.REDIS_USERNAME;
-}
+    const options = {
+        maxRetriesPerRequest: null,
+        retryStrategy: () => null,
+        reconnectOnError: () => false,
+        lazyConnect: true, // Don't connect immediately – connect on first command
+    };
 
-if (process.env.REDIS_PASSWORD) {
-    options.password = process.env.REDIS_PASSWORD;
-}
-
-if (useTls) {
-    options.tls = { minVersion: "TLSv1.2" };
-}
-
-const connection = new IORedis(normalizedRedisUrl, options);
-
-connection.on("error", (error) => {
-    if (error?.message?.includes("WRONGPASS")) {
-        console.error(
-            "Redis auth failed (WRONGPASS). Verify REDIS_URL / REDIS_PASSWORD / REDIS_USERNAME credentials."
-        );
+    if (process.env.REDIS_USERNAME) {
+        options.username = process.env.REDIS_USERNAME;
     }
 
-    if (error?.code === "ERR_SSL_WRONG_VERSION_NUMBER") {
-        console.error(
-            `Redis TLS mismatch. Using URL ${normalizedRedisUrl}. Check REDIS_TLS and URL scheme (redis:// vs rediss://).`
-        );
+    if (process.env.REDIS_PASSWORD) {
+        options.password = process.env.REDIS_PASSWORD;
     }
-});
+
+    if (useTls) {
+        options.tls = { minVersion: "TLSv1.2" };
+    }
+
+    connection = new IORedis(normalizedRedisUrl, options);
+
+    connection.on("error", (error) => {
+        if (error?.message?.includes("WRONGPASS")) {
+            console.error(
+                "Redis auth failed (WRONGPASS). Verify REDIS_URL / REDIS_PASSWORD / REDIS_USERNAME credentials."
+            );
+        }
+
+        if (error?.code === "ERR_SSL_WRONG_VERSION_NUMBER") {
+            console.error(
+                `Redis TLS mismatch. Using URL ${normalizedRedisUrl}. Check REDIS_TLS and URL scheme (redis:// vs rediss://).`
+            );
+        }
+    });
+}
 
 export default connection;

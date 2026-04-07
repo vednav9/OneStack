@@ -17,8 +17,12 @@ import listRoutes from "./src/routes/listRoutes.js";
 import "./src/config/googleStrategy.js";
 
 if (!process.env.VERCEL) {
-  await import("./src/jobs/blogParser.js");
-  await import("./src/jobs/scheduler.js");
+  try {
+    await import("./src/jobs/blogParser.js");
+    await import("./src/jobs/scheduler.js");
+  } catch (err) {
+    console.error("[startup] Failed to load background jobs:", err.message);
+  }
 }
 
 const app = express();
@@ -36,7 +40,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('(.*)', cors(corsOptions));
+app.options("/*", cors(corsOptions));
 
 app.use(express.json());
 app.use(requestLogger);
