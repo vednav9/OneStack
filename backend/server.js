@@ -28,15 +28,15 @@ const allowedOrigins = (env.frontendUrl || "")
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
     origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-}));
+};
 
-// Must be BEFORE routes — responds 200 to all preflight OPTIONS requests
-app.options("*", cors());
+app.use(cors(corsOptions));
+app.options('(.*)', cors(corsOptions));
 
 app.use(express.json());
 app.use(requestLogger);
