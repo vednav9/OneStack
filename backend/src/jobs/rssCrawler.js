@@ -1,6 +1,7 @@
 import Parser from "rss-parser";
 import { crawlQueue } from "../queues/crawlQueue.js";
 import { fileURLToPath } from "url";
+import { summarizeNetworkError, withNetworkRetry } from "../utils/network.js";
 
 const parser = new Parser();
 const MAX_ITEMS_PER_FEED = 30;
@@ -18,7 +19,10 @@ export async function runCrawler() {
     for (const feed of feeds) {
         console.log(`Crawling ${feed}...`);
         try {
-            const data = await parser.parseURL(feed);
+            const data = await withNetworkRetry(
+                () => parser.parseURL(feed),
+                { attempts: 3, initialDelayMs: 300, maxDelayMs: 1800 }
+            );
             const items = (data.items || []).slice(0, MAX_ITEMS_PER_FEED);
             console.log(`Found ${data.items.length} items in ${feed} (processing ${items.length})`);
 
@@ -37,7 +41,7 @@ export async function runCrawler() {
             }
             console.log(`Added items from ${feed} to queue.`);
         } catch (error) {
-            console.error(`Failed to crawl ${feed}:`, error.message);
+            console.error(`Failed to crawl ${feed}: ${summarizeNetworkError(error)}`);
         }
     }
     console.log("Crawler run complete.");
