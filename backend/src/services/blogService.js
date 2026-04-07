@@ -2,6 +2,7 @@ import prisma from "../config/db.js";
 import axios from "axios";
 import redis from "../config/redis.js";
 import { env } from "../config/env.js";
+import { withNetworkRetry } from "../utils/network.js";
 
 const EMBED_STATUS_CACHE_TTL_SECONDS = 60 * 60 * 6;
 
@@ -83,11 +84,14 @@ export async function getEmbedStatusByBlogId(id) {
         // Ignore cache errors and fallback to live header check.
     }
 
-    const response = await axios.get(url, {
-        timeout: 12000,
-        maxRedirects: 5,
-        validateStatus: () => true,
-    });
+    const response = await withNetworkRetry(
+        () => axios.get(url, {
+            timeout: 12000,
+            maxRedirects: 5,
+            validateStatus: () => true,
+        }),
+        { attempts: 3, initialDelayMs: 300, maxDelayMs: 1600 }
+    );
 
     const xFrameOptions = String(response.headers["x-frame-options"] || "").toUpperCase();
     const csp = String(response.headers["content-security-policy"] || "");
