@@ -54,6 +54,10 @@ app.use("/api/lists", listRoutes);
 
 app.use(errorHandler);
 
-app.listen(env.port, () => {
-    logger.info(`Server is running on ${env.port}`);
-});
+if (process.env.NODE_ENV !== "production") {
+    app.listen(env.port, () => {
+        logger.info(`Server is running on ${env.port}`);
+    });
+}
+
+export default app;
