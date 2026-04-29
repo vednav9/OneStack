@@ -54,6 +54,20 @@ app.get("/", (req, res) => {
     res.json({ message: "API is running" });
 });
 
+// Temporary diagnostic endpoint to verify env vars on Vercel
+app.get("/debug/env", (req, res) => {
+    const keys = [
+        "DATABASE_URL", "JWT_SECRET", "JWT_REFRESH_SECRET", "FRONTEND_URL",
+        "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GEMINI_API_KEY",
+        "REDIS_URL", "REDIS_TLS", "NODE_ENV", "VERCEL"
+    ];
+    const status = {};
+    for (const k of keys) {
+        status[k] = process.env[k] ? "✅ SET" : "❌ MISSING";
+    }
+    res.json({ env: status });
+});
+
 app.use("/api", routes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
