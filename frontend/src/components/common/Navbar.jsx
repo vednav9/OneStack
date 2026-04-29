@@ -50,7 +50,7 @@ export default function Navbar({ onMenuClick }) {
           <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary">
             <Compass className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-gradient-red hidden sm:block">BlogSphere</span>
+          <span className="text-gradient-red hidden sm:block">OneStack</span>
         </Link>
 
         {/* Search */}

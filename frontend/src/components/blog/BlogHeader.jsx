@@ -1,5 +1,5 @@
 import { Share2, Bookmark, ExternalLink, Clock } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/Avatar";
+import { Avatar, AvatarFallback } from "../ui/Avatar";
 import { Button } from "../ui/Button";
 import { useBlogStore } from "../../store/blogStore";
 import { formatDate } from "../../utils/formatDate";
@@ -58,7 +58,7 @@ export default function BlogHeader({ blog }) {
       <div className="flex items-center justify-between flex-wrap gap-4 border-y py-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={blog.author?.image} alt={blog.author?.name} />
+            
             <AvatarFallback className="bg-primary/10 text-primary font-semibold">
               {(blog.author?.name || company || "?").charAt(0).toUpperCase()}
             </AvatarFallback>

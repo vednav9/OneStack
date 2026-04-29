@@ -1,12 +1,13 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Bookmark, Clock, ThumbsUp, ExternalLink } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/Avatar";
+import { Avatar, AvatarFallback } from "../ui/Avatar";
 import { useBlogStore } from "../../store/blogStore";
 import { formatDate } from "../../utils/formatDate";
 import { readingTime } from "../../utils/readingTime";
 import Tag from "../ui/Tag";
 
 export default function BlogCard({ blog }) {
+  const navigate = useNavigate();
   const { savedBlogs, likedBlogs, toggleSave, toggleLike } = useBlogStore();
   const isSaved = savedBlogs.includes(blog.id);
   const isLiked = likedBlogs.includes(blog.id);
@@ -18,7 +19,6 @@ export default function BlogCard({ blog }) {
   const publishedDate = publishedAt ? formatDate(publishedAt, "short") : null;
   const thumbnail = blog.coverImage || blog.thumbnail;
   const authorName = typeof blog.author === "string" ? blog.author : blog.author?.name;
-  const authorAvatar = typeof blog.author === "object" ? blog.author?.image : undefined;
   const hasAuthor = typeof authorName === "string" && authorName.trim() !== "" && authorName.trim().toLowerCase() !== "null";
   
   let faviconUrl = "";
@@ -50,41 +50,44 @@ export default function BlogCard({ blog }) {
   return (
     <article
       id={`blog-card-${blog.id}`}
-      className="group relative p-5 rounded-xl border bg-card hover:border-primary/30 hover:shadow-md transition-all duration-200 animate-fade-in"
+      className="group relative overflow-hidden rounded-2xl border bg-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 animate-fade-in cursor-pointer"
+      role="link"
+      tabIndex={0}
+      onClick={() => navigate(`/blog/${blog.id}`)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          navigate(`/blog/${blog.id}`);
+        }
+      }}
     >
-      <div className="flex gap-4">
-        {/* Text content */}
-        <div className="flex-1 min-w-0">
-          {/* Author */}
-          {hasAuthor && (
-            <div className="flex items-center gap-2 mb-2 relative z-10">
-              <Avatar className="h-5 w-5">
-                <AvatarImage src={authorAvatar} alt={authorName} />
-                <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
-                  {(authorName || "?").charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-xs font-medium text-muted-foreground">
-                {authorName}
-              </span>
+
+      <div className="relative z-10">
+        {/* Thumbnail */}
+        {thumbnail && (
+          <div className="relative">
+            <div className="h-52 sm:h-60 md:h-64 lg:h-72 w-full overflow-hidden">
+              <img
+                src={thumbnail}
+                alt={blog.title}
+                className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
             </div>
-          )}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+          </div>
+        )}
 
-          {/* Stretched Invisible Link for Whole Card Clickability */}
-          <Link to={`/blog/${blog.id}`} className="absolute inset-0 z-0" aria-label={`Read ${blog.title}`} />
-          
-          {/* Title */}
-          <h2 className="text-base font-bold leading-snug mb-1.5 group-hover:text-primary transition-colors line-clamp-2 relative z-10 pointer-events-none">
-            {blog.title}
-          </h2>
-
+        {/* Text content */}
+        <div className="relative z-10 min-w-0 p-5 md:p-6">
           {(publishedDate || sourceLabel) && (
-            <div className="mb-4 flex items-center gap-2 text-[11px] font-semibold tracking-wide uppercase text-muted-foreground relative z-10 pointer-events-none">
+            <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px] font-semibold tracking-wide uppercase text-muted-foreground">
               {publishedDate && <span>{publishedDate}</span>}
               {publishedDate && sourceLabel && <span className="opacity-50">·</span>}
               {sourceLabel && (
                 <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground shadow-sm pointer-events-auto transition-colors hover:bg-secondary/80">
-                  {faviconUrl && <img src={faviconUrl} alt="favicon" className="w-3.5 h-3.5 rounded-sm bg-white" />}
+                  {faviconUrl && (
+                    <img src={faviconUrl} alt="favicon" className="w-3.5 h-3.5 rounded-sm bg-white" />
+                  )}
                   {originalUrl ? (
                     <a
                       href={originalUrl}
@@ -103,21 +106,46 @@ export default function BlogCard({ blog }) {
             </div>
           )}
 
+          {/* Title */}
+          <h2 className="text-xl sm:text-2xl font-bold leading-snug group-hover:text-primary transition-colors line-clamp-2">
+            {blog.title}
+          </h2>
+
+          {hasAuthor && (
+            <div className="mt-2 flex items-center gap-2">
+              <Avatar className="h-6 w-6">
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                  {(authorName || "?").charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-xs font-semibold text-muted-foreground">
+                {authorName}
+              </span>
+            </div>
+          )}
+
+          {blog.description && (
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed line-clamp-2">
+              {blog.description}
+            </p>
+          )}
+
           {/* Tags */}
           {tags.length > 0 && (
-            <div className="flex gap-1.5 flex-wrap mb-3 relative z-10">
+            <div className="flex gap-1.5 flex-wrap mt-3">
               {tags.map((tag) => (
-                <Tag
-                  key={tag}
-                  label={tag}
-                  to={`/topic/${tag.toLowerCase().replace(/ /g, "-")}`}
-                />
+                <span key={tag} onClick={(e) => e.stopPropagation()} className="pointer-events-auto">
+                  <Tag
+                    label={tag}
+                    to={`/topic/${tag.toLowerCase().replace(/ /g, "-")}`}
+                  />
+                </span>
               ))}
             </div>
           )}
 
           {/* Footer row */}
-          <div className="flex items-center justify-between gap-2 relative z-10">
+          <div className="mt-4 flex items-center justify-between gap-2">
             <div className="flex items-center gap-3 text-xs text-muted-foreground pointer-events-none">
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
@@ -137,6 +165,7 @@ export default function BlogCard({ blog }) {
                 id={`like-btn-${blog.id}`}
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   toggleLike(blog.id);
                 }}
                 className={`p-1.5 rounded-md transition-all hover:bg-secondary ${
@@ -152,6 +181,7 @@ export default function BlogCard({ blog }) {
                 id={`save-btn-${blog.id}`}
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   toggleSave(blog.id);
                 }}
                 className={`p-1.5 rounded-md transition-all hover:bg-secondary ${
@@ -171,6 +201,7 @@ export default function BlogCard({ blog }) {
                   id={`external-link-${blog.id}`}
                   className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
                   aria-label="Open original"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                 </a>
@@ -178,19 +209,6 @@ export default function BlogCard({ blog }) {
             </div>
           </div>
         </div>
-
-        {/* Thumbnail */}
-        {thumbnail && (
-          <Link to={`/blog/${blog.id}`} className="shrink-0 hidden sm:block">
-            <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted border">
-              <img
-                src={thumbnail}
-                alt={blog.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          </Link>
-        )}
       </div>
     </article>
   );

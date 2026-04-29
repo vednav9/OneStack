@@ -30,7 +30,7 @@ export default function Footer() {
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <Compass className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg text-gradient-red">BlogSphere</span>
+              <span className="font-bold text-lg text-gradient-red">OneStack</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               Unified discovery platform for real-world engineering blogs from top tech companies.
@@ -86,7 +86,7 @@ export default function Footer() {
 
         <div className="border-t pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} BlogSphere. All rights reserved.
+            © {new Date().getFullYear()} OneStack. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
             Built for developers who care about how real systems are built.

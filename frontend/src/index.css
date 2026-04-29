@@ -398,10 +398,12 @@
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
   .text-gradient-red {
-    background: linear-gradient(135deg, hsl(0, 84%, 42%), hsl(0, 72%, 60%));
+    color: hsl(var(--primary));
+    background: linear-gradient(135deg, hsl(0, 84%, 56%), hsl(0, 72%, 68%));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 8px hsl(0 84% 52% / 0.35);
   }
 
   .bg-glass {
