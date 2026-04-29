@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import { runCrawler } from "./rssCrawler.js";
 
-// Run once per hour at minute 0.
+// Run once per minute.
 cron.schedule("* * * * *", () => {
     runCrawler();
 });
