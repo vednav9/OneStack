@@ -8,6 +8,34 @@ const TAG_RULES = [
     ["Machine Learning", "machine learning", "ml model", "supervised", "unsupervised", "reinforcement learning", "training model", "scikit", "pytorch", "tensorflow", "hugging face", "transformers"],
     ["LLM", "large language model", "llm", "gpt-4", "gpt-3", "palm", "llama", "gemma", "mistral", "falcon", "rag", "retrieval augmented"],
 
+    // System Design / Architecture
+    [
+        "System Design",
+        "system design",
+        "distributed systems",
+        "scalability",
+        "load balancer",
+        "load balancing",
+        "rate limiting",
+        "queue",
+        "message queue",
+        "cache",
+        "caching",
+        "sharding",
+        "replication",
+        "high availability",
+        "consistency",
+        "cap theorem",
+        "throughput",
+        "latency",
+        "microservices",
+        "monolith",
+        "design pattern",
+        "clean architecture",
+        "domain-driven",
+        "ddd",
+    ],
+
     // Web Dev
     ["JavaScript", "javascript", "js ", "node.js", "nodejs", "typescript", "ts ", "deno", "bun "],
     ["TypeScript", "typescript", " tsx", " ts "],
@@ -21,14 +49,37 @@ const TAG_RULES = [
     ["Web", "web development", "web app", "progressive web", "web performance", "html", "webassembly", "wasm"],
 
     // Cloud / Infra
-    ["Cloud", "cloud computing", "aws", "amazon web services", "azure", "google cloud", "gcp", "cloud native"],
-    ["Kubernetes", "kubernetes", " k8s", "helm", "kubectl", "container orchestration"],
-    ["Docker", "docker", "container", "dockerfile", "containerization"],
+    [
+        "Infrastructure",
+        "infrastructure",
+        "cloud computing",
+        "aws",
+        "amazon web services",
+        "azure",
+        "google cloud",
+        "gcp",
+        "cloud native",
+        "kubernetes",
+        " k8s",
+        "helm",
+        "kubectl",
+        "container",
+        "docker",
+        "dockerfile",
+        "containerization",
+        "serverless",
+        "lambda",
+        "cloud functions",
+        "edge functions",
+        "vercel",
+        "netlify",
+        "sre",
+        "site reliability",
+    ],
     ["DevOps", "devops", "ci/cd", "continuous integration", "continuous deployment", "github actions", "jenkins", "pipeline", "infrastructure as code"],
-    ["Serverless", "serverless", "lambda", "cloud functions", "edge functions", "vercel", "netlify"],
 
     // Data
-    ["Database", "database", "postgresql", "mysql", "sqlite", "mongodb", "redis", "nosql", "sql", "orm", "prisma", "drizzle"],
+    ["Databases", "database", "databases", "postgresql", "mysql", "sqlite", "mongodb", "redis", "nosql", "sql", "orm", "prisma", "drizzle"],
     ["Data Engineering", "data pipeline", "data warehouse", "etl", "spark", "kafka", "airflow", "dbt", "snowflake", "bigquery"],
     ["Analytics", "analytics", "data analysis", "data science", "visualization", "pandas", "numpy", "matplotlib"],
 
@@ -60,9 +111,6 @@ const TAG_RULES = [
 
     // Blockchain/Web3
     ["Web3", "web3", "blockchain", "ethereum", "smart contract", "nft", "defi", "solidity", "crypto", "decentralized"],
-
-    // Architecture
-    ["Architecture", "microservices", "monolith", "distributed systems", "system design", "design pattern", "clean architecture", "domain-driven", "ddd"],
 
     // Gaming
     ["Gaming", "game development", "unity", "unreal", "game engine", "gamedev", "indie game"],
