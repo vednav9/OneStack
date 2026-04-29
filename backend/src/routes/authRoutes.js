@@ -7,7 +7,10 @@ import { saveRefreshToken, deleteRefreshTokensByUserId } from "../services/authS
 import { env } from "../config/env.js";
 
 const router = express.Router();
-const frontendUrl = (env.frontendUrl).replace(/\/$/, "");
+const frontendUrl = (env.frontendUrl || "http://localhost:5173")
+    .split(",")[0]
+    .trim()
+    .replace(/\/$/, "");
 
 router.post("/register", register);
 router.post("/login", login);

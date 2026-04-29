@@ -16,31 +16,39 @@ import tagRoutes from "./src/routes/tagRoutes.js";
 import listRoutes from "./src/routes/listRoutes.js";
 import "./src/config/googleStrategy.js";
 
-if (!process.env.VERCEL) {
-  try {
-    await import("./src/jobs/blogParser.js");
-    await import("./src/jobs/scheduler.js");
-  } catch (err) {
-    console.error("[startup] Failed to load background jobs:", err.message);
-  }
+const enableJobs = process.env.ENABLE_JOBS === "true";
+if (enableJobs && !process.env.VERCEL) {
+    try {
+        await import("./src/jobs/blogParser.js");
+        await import("./src/jobs/scheduler.js");
+    } catch (err) {
+        console.error("[startup] Failed to load background jobs:", err.message);
+    }
 }
 
 const app = express();
 
-const allowedOrigins = (env.frontendUrl || "")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+const normalizeOrigin = (origin) => origin.trim().replace(/\/$/, "");
+
+const allowedOrigins = (env.frontendUrl || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+  .map(normalizeOrigin);
 
 const corsOptions = {
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const normalizedOrigin = normalizeOrigin(origin);
+    return callback(null, allowedOrigins.includes(normalizedOrigin));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
-app.options("/*", cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 app.use(express.json());
 app.use(requestLogger);
@@ -52,20 +60,6 @@ app.get("/favicon.png", (req, res) => res.status(204).end());
 
 app.get("/", (req, res) => {
     res.json({ message: "API is running" });
-});
-
-// Temporary diagnostic endpoint to verify env vars on Vercel
-app.get("/debug/env", (req, res) => {
-    const keys = [
-        "DATABASE_URL", "JWT_SECRET", "JWT_REFRESH_SECRET", "FRONTEND_URL",
-        "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GEMINI_API_KEY",
-        "REDIS_URL", "REDIS_TLS", "NODE_ENV", "VERCEL"
-    ];
-    const status = {};
-    for (const k of keys) {
-        status[k] = process.env[k] ? "✅ SET" : "❌ MISSING";
-    }
-    res.json({ env: status });
 });
 
 app.use("/api", routes);
