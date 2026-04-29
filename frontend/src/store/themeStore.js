@@ -19,7 +19,7 @@ const useThemeStore = create(
       },
     }),
     {
-      name: "blogsphere-theme",
+      name: "OneStack-theme",
       partialize: (state) => ({ theme: state.theme }),
     }
   )

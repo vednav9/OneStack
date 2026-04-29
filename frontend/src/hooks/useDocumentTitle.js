@@ -8,7 +8,7 @@ export default function useDocumentTitle(title) {
   useEffect(() => {
     const originalTitle = document.title;
     if (title) {
-       document.title = `${title} | BlogSphere`;
+       document.title = `${title} | OneStack`;
     }
     
     // Cleanup if component unmounts
