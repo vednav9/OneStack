@@ -58,7 +58,7 @@ export default function Login() {
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
             <Compass className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="font-bold text-2xl tracking-tight text-gradient-red">BlogSphere</span>
+          <span className="font-bold text-2xl tracking-tight text-gradient-red">OneStack</span>
         </Link>
 
         {/* Form container */}

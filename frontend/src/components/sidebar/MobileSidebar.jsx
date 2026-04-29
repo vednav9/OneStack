@@ -41,7 +41,7 @@ export default function MobileSidebar({ open, onClose }) {
       <div className="fixed inset-y-0 left-0 w-72 bg-background border-r z-50 md:hidden flex flex-col animate-slide-up">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
-          <span className="font-bold text-lg text-gradient-red">BlogSphere</span>
+          <span className="font-bold text-lg text-gradient-red">OneStack</span>
           <button
             id="mobile-sidebar-close"
             onClick={onClose}
@@ -81,7 +81,7 @@ export default function MobileSidebar({ open, onClose }) {
         {/* Footer note */}
         <div className="px-5 py-4 border-t">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} BlogSphere
+            © {new Date().getFullYear()} OneStack
           </p>
         </div>
       </div>

@@ -29,10 +29,10 @@ export default function LeftSidebar() {
               id={`sidebar-${item.name.toLowerCase()}`}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 group",
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 group text-foreground",
                   isActive
                     ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    : "hover:bg-secondary hover:text-foreground"
                 )
               }
             >
@@ -41,7 +41,7 @@ export default function LeftSidebar() {
                   <Icon
                     className={cn(
                       "h-4 w-4 transition-colors",
-                      isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                      isActive ? "text-primary" : "text-foreground group-hover:text-foreground"
                     )}
                   />
                   <span>{item.name}</span>
@@ -61,9 +61,9 @@ export default function LeftSidebar() {
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Zap className="h-4 w-4 text-primary" />
-              <h4 className="font-semibold text-sm">Join BlogSphere</h4>
+              <h4 className="font-semibold text-sm">Join OneStack</h4>
             </div>
-            <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+            <p className="text-xs text-foreground mb-3 leading-relaxed">
               Save blogs, get personalized recommendations, and join the community.
             </p>
             <Button size="sm" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" asChild>

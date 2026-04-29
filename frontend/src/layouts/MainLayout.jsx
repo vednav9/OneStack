@@ -21,8 +21,8 @@ export default function MainLayout() {
         <div className="flex gap-0 md:gap-8 lg:gap-10">
 
           {/* Left sidebar – hidden on mobile */}
-          <aside className="hidden md:block w-[220px] lg:w-[240px] shrink-0">
-            <div className="sticky top-[3.6rem] h-[calc(100vh-3.6rem)] overflow-y-auto py-6 no-scrollbar border-r border-border pr-6">
+          <aside className="hidden md:block w-[220px] lg:w-[240px] shrink-0 -ml-8 md:-ml-12 lg:-ml-14">
+            <div className="sticky top-[3.6rem] h-[calc(100vh-3.6rem)] overflow-y-auto py-6 no-scrollbar border-r border-border pr-4">
               <LeftSidebar />
             </div>
           </aside>

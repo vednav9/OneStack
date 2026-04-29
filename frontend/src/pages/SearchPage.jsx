@@ -51,7 +51,7 @@ export default function SearchPage() {
           <div className="flex items-center gap-2">
             <SearchIcon className="h-5 w-5 text-muted-foreground" />
             <h1 className="text-2xl font-bold tracking-tight">
-              {query ? `Results for "${query}"` : "Search BlogSphere"}
+              {query ? `Results for "${query}"` : "Search OneStack"}
             </h1>
             {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground ml-2" />}
           </div>

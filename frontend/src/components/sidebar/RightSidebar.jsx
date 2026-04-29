@@ -83,7 +83,7 @@ export default function RightSidebar() {
         <Link to="#" className="hover:text-foreground transition-colors">About</Link>
         <span>·</span>
         <Link to="#" className="hover:text-foreground transition-colors">Privacy</Link>
-        <p className="mt-2">© {new Date().getFullYear()} BlogSphere</p>
+        <p className="mt-2">© {new Date().getFullYear()} OneStack</p>
       </div>
     </div>
   );
