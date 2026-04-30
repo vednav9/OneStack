@@ -1,11 +1,11 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { TrendingUp } from "lucide-react";
 import { Button } from "../ui/Button";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/Avatar";
 import { TOPICS } from "../../utils/constants";
+import api from "../../services/api";
 
-// Static trending sources for now (will be API-driven)
-const TRENDING_SOURCES = [
+const DEFAULT_TRENDING_SOURCES = [
   { id: 1, name: "Netflix Tech Blog", company: "Netflix", tag: "Distributed Systems", color: "bg-red-500" },
   { id: 2, name: "Uber Engineering", company: "Uber", tag: "Real-time Systems", color: "bg-gray-800" },
   { id: 3, name: "Airbnb Engineering", company: "Airbnb", tag: "ML Platform", color: "bg-red-600" },
@@ -13,8 +13,50 @@ const TRENDING_SOURCES = [
   { id: 5, name: "Stripe Tech", company: "Stripe", tag: "Payments API", color: "bg-indigo-600" },
 ];
 
+const SOURCE_COLORS = [
+  "bg-red-500",
+  "bg-gray-800",
+  "bg-red-600",
+  "bg-blue-600",
+  "bg-indigo-600",
+  "bg-emerald-600",
+  "bg-amber-600",
+  "bg-slate-700",
+];
+
 export default function RightSidebar() {
-  const displayTopics = TOPICS.slice(0, 10);
+  const [sources, setSources] = useState(DEFAULT_TRENDING_SOURCES);
+  const [topics, setTopics] = useState(TOPICS.slice(0, 10));
+
+  useEffect(() => {
+    let cancelled = false;
+
+    api.get("/sources")
+      .then((data) => {
+        if (!cancelled && Array.isArray(data) && data.length > 0) {
+          setSources(data);
+        }
+      })
+      .catch(() => {});
+
+    api.get("/tags")
+      .then((data) => {
+        if (!cancelled && Array.isArray(data) && data.length > 0) {
+          setTopics(data.slice(0, 10));
+        }
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, []);
+
+  const displaySources = useMemo(() => (
+    Array.isArray(sources) && sources.length > 0 ? sources : DEFAULT_TRENDING_SOURCES
+  ), [sources]);
+
+  const displayTopics = useMemo(() => (
+    Array.isArray(topics) && topics.length > 0 ? topics : TOPICS.slice(0, 10)
+  ), [topics]);
 
   return (
     <div className="space-y-8 py-2">
@@ -25,26 +67,35 @@ export default function RightSidebar() {
           <h3 className="font-semibold text-sm">Trending Sources</h3>
         </div>
         <div className="space-y-3">
-          {TRENDING_SOURCES.map((source) => (
+          {displaySources.map((source, index) => {
+            const name = source?.name || source?.company || source?.sourceSite || "Source";
+            const subtitle = source?.tag || (source?.count ? `${source.count} posts` : source?.sourceSite || "");
+            const query = source?.query || source?.sourceSite || source?.name || source?.company || "";
+            const color = source?.color || SOURCE_COLORS[index % SOURCE_COLORS.length];
+            const iconChar = name.charAt(0).toUpperCase();
+            const linkTarget = query ? `/search?q=${encodeURIComponent(query)}` : "/search";
+
+            return (
             <Link
-              key={source.id}
-              to={`/topic/${source.company.toLowerCase()}`}
-              id={`trending-source-${source.id}`}
+              key={source.id || `${name}-${index}`}
+              to={linkTarget}
+              id={`trending-source-${source.id || index}`}
               className="flex items-center gap-3 group"
             >
               <div
-                className={`w-8 h-8 rounded-lg ${source.color} flex items-center justify-center text-white text-xs font-bold shrink-0 group-hover:scale-105 transition-transform`}
+                className={`w-8 h-8 rounded-lg ${color} flex items-center justify-center text-white text-xs font-bold shrink-0 group-hover:scale-105 transition-transform`}
               >
-                {source.company.charAt(0)}
+                {iconChar}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
-                  {source.name}
+                  {name}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">{source.tag}</p>
+                <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </section>
 

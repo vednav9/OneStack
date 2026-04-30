@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bookmark, Clock, ThumbsUp, ExternalLink } from "lucide-react";
+import { Bookmark, Clock, ThumbsUp, ThumbsDown, ExternalLink } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/Avatar";
 import { useBlogStore } from "../../store/blogStore";
 import { formatDate } from "../../utils/formatDate";
@@ -8,9 +8,13 @@ import Tag from "../ui/Tag";
 
 export default function BlogCard({ blog }) {
   const navigate = useNavigate();
-  const { savedBlogs, likedBlogs, toggleSave, toggleLike } = useBlogStore();
+  const { savedBlogs, upvotedBlogs, downvotedBlogs, toggleSave, toggleUpvote, toggleDownvote, voteDeltas } = useBlogStore();
   const isSaved = savedBlogs.includes(blog.id);
-  const isLiked = likedBlogs.includes(blog.id);
+  const isUpvoted = upvotedBlogs.includes(blog.id);
+  const isDownvoted = downvotedBlogs.includes(blog.id);
+  const delta = voteDeltas[blog.id] || { up: 0, down: 0 };
+  const upvotes = (blog.upvotes ?? 0) + delta.up;
+  const downvotes = (blog.downvotes ?? 0) + delta.down;
 
   const estRead = readingTime(blog.content || blog.description || "");
   const tags = (blog.tags || []).slice(0, 3);
@@ -151,29 +155,51 @@ export default function BlogCard({ blog }) {
                 <Clock className="h-3 w-3" />
                 {estRead}
               </span>
-              {blog.likes !== undefined && (
+              {(blog.upvotes !== undefined || blog.downvotes !== undefined) && (
                 <span className="flex items-center gap-1">
                   <ThumbsUp className="h-3 w-3" />
-                  {blog.likes || 0}
+                  {upvotes}
+                </span>
+              )}
+              {(blog.upvotes !== undefined || blog.downvotes !== undefined) && (
+                <span className="flex items-center gap-1">
+                  <ThumbsDown className="h-3 w-3" />
+                  {downvotes}
                 </span>
               )}
             </div>
 
             <div className="flex items-center gap-1">
-              {/* Like */}
+              {/* Upvote */}
               <button
-                id={`like-btn-${blog.id}`}
+                id={`upvote-btn-${blog.id}`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  toggleLike(blog.id);
+                  toggleUpvote(blog.id);
                 }}
                 className={`p-1.5 rounded-md transition-all hover:bg-secondary ${
-                  isLiked ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  isUpvoted ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
-                aria-label={isLiked ? "Unlike" : "Like"}
+                aria-label={isUpvoted ? "Remove upvote" : "Upvote"}
               >
                 <ThumbsUp className="h-3.5 w-3.5" />
+              </button>
+
+              {/* Downvote */}
+              <button
+                id={`downvote-btn-${blog.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleDownvote(blog.id);
+                }}
+                className={`p-1.5 rounded-md transition-all hover:bg-secondary ${
+                  isDownvoted ? "text-destructive" : "text-muted-foreground hover:text-foreground"
+                }`}
+                aria-label={isDownvoted ? "Remove downvote" : "Downvote"}
+              >
+                <ThumbsDown className="h-3.5 w-3.5" />
               </button>
 
               {/* Save */}
