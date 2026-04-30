@@ -262,6 +262,15 @@ export async function processCrawlJob({ url, title, publishedAt, author, categor
     const descriptionValue = description || undefined;
     const thumbnailValue = thumbnail || undefined;
 
+    const existing = await prisma.blog.findUnique({
+        where: { sourceURL: url },
+        select: { id: true, deletedAt: true },
+    });
+
+    if (existing?.deletedAt) {
+        return existing;
+    }
+
     const blog = await prisma.blog.upsert({
         where: { sourceURL: url },
         update: {

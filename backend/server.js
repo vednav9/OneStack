@@ -1,5 +1,4 @@
 import express from "express";
-import path from "path";
 import cors from "cors";
 import passport from "passport";
 import { env } from "./src/config/env.js";
@@ -57,9 +56,6 @@ app.options(/.*/, cors(corsOptions));
 app.use(express.json());
 app.use(requestLogger);
 app.use(passport.initialize());
-
-// Serve uploaded assets
-app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
 // Silence favicon requests from crawlers (e.g. Vercel's vercel-favicon/1.0)
 app.get("/favicon.ico", (req, res) => res.status(204).end());

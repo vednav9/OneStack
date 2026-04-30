@@ -1,18 +1,6 @@
-import fs from "fs";
-import path from "path";
 import multer from "multer";
 
-const uploadRoot = path.resolve(process.cwd(), "uploads", "avatars");
-fs.mkdirSync(uploadRoot, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadRoot),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname || "").toLowerCase();
-    const safeExt = [".png", ".jpg", ".jpeg", ".webp"].includes(ext) ? ext : ".jpg";
-    cb(null, `${req.user.userId}-${Date.now()}${safeExt}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 function fileFilter(_req, file, cb) {
   const allowed = ["image/jpeg", "image/png", "image/webp"];
