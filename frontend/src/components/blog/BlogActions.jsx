@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { ThumbsUp, ThumbsDown, Bookmark, Share2, ExternalLink } from "lucide-react";
 import { useBlogStore } from "../../store/blogStore";
 import { useAuthStore } from "../../store/authStore";
 import { cn } from "../../utils/cn";
+import SaveToListModal from "./SaveToListModal";
 
 export default function BlogActions({ blog }) {
   const { user } = useAuthStore();
   const { savedBlogs, upvotedBlogs, downvotedBlogs, toggleSave, toggleUpvote, toggleDownvote, voteDeltas } = useBlogStore();
   const blogId = blog?.id;
+  const [saveOpen, setSaveOpen] = useState(false);
   const isAdmin = user?.role === "ADMIN";
   const blogUrl = blog?.url || blog?.sourceURL;
   const isSaved = blogId ? savedBlogs.includes(blogId) : false;
@@ -70,7 +73,7 @@ export default function BlogActions({ blog }) {
       {/* Save */}
       <button
         id={`action-save-${blogId}`}
-        onClick={() => blogId && toggleSave(blogId)}
+        onClick={() => blogId && setSaveOpen(true)}
         className={cn(
           actionBtn,
           isSaved
@@ -108,6 +111,14 @@ export default function BlogActions({ blog }) {
           Original Source
         </a>
       )}
+
+      <SaveToListModal
+        open={saveOpen}
+        onClose={() => setSaveOpen(false)}
+        blogId={blogId}
+        isSaved={isSaved}
+        onToggleSave={() => blogId && toggleSave(blogId)}
+      />
     </div>
   );
 }

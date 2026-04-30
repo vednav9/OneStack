@@ -44,9 +44,6 @@ export default function SearchPage() {
     <div className="space-y-6 animate-fade-in">
       <header className="border-b pb-8 mb-8">
         <div className="flex flex-col gap-6">
-          <div className="w-full max-w-2xl">
-            <SearchBar initialQuery={query} autoFocus className="mb-2" />
-          </div>
 
           <div className="flex items-center gap-2">
             <SearchIcon className="h-5 w-5 text-muted-foreground" />
