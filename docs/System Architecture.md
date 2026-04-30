@@ -1,4 +1,5 @@
-                    ┌──────────────────────┐
+Built OneStack, a full-stack engineering blog discovery platform that aggregates production-grade technical content, supports search and personalized recommendations, and enables saves, likes, history, and custom reading lists.                    ┌──────────────────────┐
+
                     │   Blog Sources       │
                     │  (RSS / Websites)    │
                     └──────────┬───────────┘
