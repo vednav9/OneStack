@@ -1,5 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import axios from "axios";
 import prisma from "./db.js";
 
 passport.use(
@@ -15,7 +16,23 @@ passport.use(
                 return done(new Error("Google account does not provide email"));
             }
 
-            const userPhoto = profile?.photos?.[0]?.value || null;
+            let userPhoto =
+                profile?.photos?.[0]?.value ||
+                profile?._json?.picture ||
+                profile?._json?.pictureUrl ||
+                null;
+
+            if (!userPhoto && accessToken) {
+                try {
+                    const response = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                        timeout: 8000,
+                    });
+                    userPhoto = response?.data?.picture || response?.data?.pictureUrl || userPhoto;
+                } catch {
+                    // Ignore profile-photo lookup failures.
+                }
+            }
 
             let user = await prisma.user.findUnique({
                 where: { email },
@@ -31,11 +48,12 @@ passport.use(
                     },
                 });
             } else {
+                const shouldUpdatePhoto = !user.userPhoto || /googleusercontent\.com/i.test(user.userPhoto);
                 user = await prisma.user.update({
                     where: { id: user.id },
                     data: {
                         googleId: user.googleId || profile.id,
-                        userPhoto: userPhoto || user.userPhoto,
+                        userPhoto: shouldUpdatePhoto ? (userPhoto || user.userPhoto) : user.userPhoto,
                         name: user.name || profile.displayName,
                     },
                 });
