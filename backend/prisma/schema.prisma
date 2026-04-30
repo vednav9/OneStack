@@ -25,10 +25,14 @@ model User {
 
   refreshToken RefreshToken[]
   savedBlogs SavedBlog[]
-  likedBlogs LikedBlog[]
+  blogUpvotes BlogUpvote[] @relation("UserBlogUpvotes")
+  blogDownvotes BlogDownvote[] @relation("UserBlogDownvotes")
   readingHistory ReadingHistory[]
   lists List[]
   followedTopics FollowedTopic[]
+  comments Comment[]
+  commentUpvotes CommentUpvote[] @relation("UserCommentUpvotes")
+  commentDownvotes CommentDownvote[] @relation("UserCommentDownvotes")
 }
 
 model RefreshToken {
@@ -57,7 +61,9 @@ model Blog {
 
   tag BlogTag[]
   savedBy SavedBlog[]
-  likedBy LikedBlog[]
+  upvotes BlogUpvote[] @relation("BlogUpvotes")
+  downvotes BlogDownvote[] @relation("BlogDownvotes")
+  comments Comment[]
   history ReadingHistory[]
   listBlog ListBlog[]
 }
@@ -91,13 +97,26 @@ model SavedBlog {
   @@unique([userId, blogId])
 }
 
-model LikedBlog {
-  id     String @id @default(uuid())
+model BlogUpvote {
+  id String @id @default(uuid())
   userId String
   blogId String
+  createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
-  blog Blog @relation(fields: [blogId], references: [id])
+  user User @relation("UserBlogUpvotes", fields: [userId], references: [id])
+  blog Blog @relation("BlogUpvotes", fields: [blogId], references: [id])
+
+  @@unique([userId, blogId])
+}
+
+model BlogDownvote {
+  id String @id @default(uuid())
+  userId String
+  blogId String
+  createdAt DateTime @default(now())
+
+  user User @relation("UserBlogDownvotes", fields: [userId], references: [id])
+  blog Blog @relation("BlogDownvotes", fields: [blogId], references: [id])
 
   @@unique([userId, blogId])
 }
@@ -110,6 +129,44 @@ model ReadingHistory {
 
   user User @relation(fields: [userId], references: [id])
   blog Blog @relation(fields: [blogId], references: [id])
+}
+
+model Comment {
+  id String @id @default(uuid())
+  userId String
+  blogId String
+  content String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  blog Blog @relation(fields: [blogId], references: [id])
+  upvotes CommentUpvote[] @relation("CommentUpvotes")
+  downvotes CommentDownvote[] @relation("CommentDownvotes")
+}
+
+model CommentUpvote {
+  id String @id @default(uuid())
+  userId String
+  commentId String
+  createdAt DateTime @default(now())
+
+  user User @relation("UserCommentUpvotes", fields: [userId], references: [id])
+  comment Comment @relation("CommentUpvotes", fields: [commentId], references: [id])
+
+  @@unique([userId, commentId])
+}
+
+model CommentDownvote {
+  id String @id @default(uuid())
+  userId String
+  commentId String
+  createdAt DateTime @default(now())
+
+  user User @relation("UserCommentDownvotes", fields: [userId], references: [id])
+  comment Comment @relation("CommentDownvotes", fields: [commentId], references: [id])
+
+  @@unique([userId, commentId])
 }
 
 model List {
