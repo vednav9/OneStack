@@ -45,6 +45,11 @@ export function removeDownvoteBlog(id) {
     return apiRequest(`/blogs/${id}/downvote`, { method: "DELETE" });
 }
 
+// Delete blog (admin only)
+export function deleteBlog(id) {
+    return apiRequest(`/blogs/${id}`, { method: "DELETE" });
+}
+
 // Add to history
 export function readBlog(id) {
     return apiRequest(`/blogs/${id}/read`, { method: "POST" });

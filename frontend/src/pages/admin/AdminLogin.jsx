@@ -3,14 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Compass, ShieldCheck } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
-import { clearAdminToken, loginAdmin, setAdminToken } from "../../services/adminService";
 import { useAuthStore } from "../../store/authStore";
 
 export default function AdminLogin() {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { loginWithTokens } = useAuthStore();
+  const { loginAdmin } = useAuthStore();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -18,23 +18,12 @@ export default function AdminLogin() {
     e.preventDefault();
     if (isLoading) return;
     setIsLoading(true);
+    setError(null);
     try {
-      const data = await loginAdmin(formData.username, formData.password);
-      if (data?.adminAccessToken) {
-        setAdminToken(data.adminAccessToken);
-      }
-      if (data?.accessToken) {
-        await loginWithTokens(data.accessToken, data.refreshToken, "Unable to complete admin sign in.");
-      }
-      if (data?.adminAccessToken) {
-        navigate("/admin", { replace: true });
-        return;
-      }
-      clearAdminToken();
-      navigate("/", { replace: true });
-    } catch {
-      clearAdminToken();
-      navigate("/", { replace: true });
+      await loginAdmin(formData.username, formData.password);
+      navigate("/admin", { replace: true });
+    } catch (err) {
+      setError(err.message || "Admin login failed");
     } finally {
       setIsLoading(false);
     }
@@ -63,6 +52,13 @@ export default function AdminLogin() {
               Enter admin credentials to access the dashboard.
             </p>
           </div>
+
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive mb-6 text-center rounded-lg p-3 text-sm flex items-center justify-center gap-2 animate-fade-in">
+              <span className="w-1 h-1 rounded-full bg-destructive" />
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">

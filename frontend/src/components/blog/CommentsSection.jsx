@@ -19,6 +19,7 @@ export default function CommentsSection({ blogId }) {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const isAdmin = user?.role === "ADMIN";
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -228,35 +229,37 @@ export default function CommentsSection({ blogId }) {
 
               <p className="text-sm text-foreground whitespace-pre-wrap">{comment.content}</p>
 
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleVote(comment.id, "up")}
-                  className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors ${
-                    comment.userVote === "up"
-                      ? "border-primary/30 text-primary bg-primary/10"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  }`}
-                  aria-label="Upvote comment"
-                >
-                  <ThumbsUp className={`h-3.5 w-3.5 ${comment.userVote === "up" ? "fill-primary" : ""}`} />
-                  {comment.upvotes ?? 0}
-                </button>
+              {!isAdmin && (
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleVote(comment.id, "up")}
+                    className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors ${
+                      comment.userVote === "up"
+                        ? "border-primary/30 text-primary bg-primary/10"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                    aria-label="Upvote comment"
+                  >
+                    <ThumbsUp className={`h-3.5 w-3.5 ${comment.userVote === "up" ? "fill-primary" : ""}`} />
+                    {comment.upvotes ?? 0}
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => handleVote(comment.id, "down")}
-                  className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors ${
-                    comment.userVote === "down"
-                      ? "border-destructive/30 text-destructive bg-destructive/10"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  }`}
-                  aria-label="Downvote comment"
-                >
-                  <ThumbsDown className={`h-3.5 w-3.5 ${comment.userVote === "down" ? "fill-destructive" : ""}`} />
-                  {comment.downvotes ?? 0}
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => handleVote(comment.id, "down")}
+                    className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors ${
+                      comment.userVote === "down"
+                        ? "border-destructive/30 text-destructive bg-destructive/10"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                    aria-label="Downvote comment"
+                  >
+                    <ThumbsDown className={`h-3.5 w-3.5 ${comment.userVote === "down" ? "fill-destructive" : ""}`} />
+                    {comment.downvotes ?? 0}
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import BlogHeader from "../components/blog/BlogHeader";
 import BlogActions from "../components/blog/BlogActions";
 import SuggestedBlogs from "../components/blog/SuggestedBlogs";
@@ -507,12 +507,16 @@ function ContentViewer({ blog, fontSize }) {
 
 export default function BlogPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { blog, loading, error, refresh } = useBlog(id);
   const { fontSize } = useReadingStore();
   const [readingProgress, setReadingProgress] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   useDocumentTitle(blog?.title);
   const { user } = useAuthStore();
+  const isAdmin = user?.role === "ADMIN";
 
   useEffect(() => {
     if (blog?.id && user) blogService.readBlog(blog.id).catch(() => {});
@@ -529,6 +533,22 @@ export default function BlogPage() {
 
   const { blogs: allBlogs } = useBlogs();
   const suggested = allBlogs.filter(b => b.id !== id).slice(0, 3);
+
+  const handleDelete = async () => {
+    if (!blog?.id || deleting) return;
+    const confirmed = window.confirm("This will remove the blog from all feeds. Continue?");
+    if (!confirmed) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await blogService.deleteBlog(blog.id);
+      navigate("/", { replace: true });
+    } catch (err) {
+      setDeleteError(err.message || "Failed to delete blog.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -600,6 +620,16 @@ export default function BlogPage() {
 
         <div className="mt-16">
           <BlogActions blog={blog} />
+          {isAdmin && (
+            <div className="mt-4">
+              <Button variant="destructive" onClick={handleDelete} isLoading={deleting}>
+                Delete blog
+              </Button>
+              {deleteError && (
+                <p className="text-sm text-destructive mt-2">{deleteError}</p>
+              )}
+            </div>
+          )}
         </div>
 
         <CommentsSection blogId={blog?.id} />

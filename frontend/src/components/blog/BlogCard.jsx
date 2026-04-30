@@ -2,13 +2,16 @@ import { useNavigate } from "react-router-dom";
 import { Bookmark, Clock, ThumbsUp, ThumbsDown, ExternalLink } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/Avatar";
 import { useBlogStore } from "../../store/blogStore";
+import { useAuthStore } from "../../store/authStore";
 import { formatDate } from "../../utils/formatDate";
 import { readingTime } from "../../utils/readingTime";
 import Tag from "../ui/Tag";
 
 export default function BlogCard({ blog }) {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const { savedBlogs, upvotedBlogs, downvotedBlogs, toggleSave, toggleUpvote, toggleDownvote, voteDeltas } = useBlogStore();
+  const isAdmin = user?.role === "ADMIN";
   const isSaved = savedBlogs.includes(blog.id);
   const isUpvoted = upvotedBlogs.includes(blog.id);
   const isDownvoted = downvotedBlogs.includes(blog.id);
@@ -170,37 +173,41 @@ export default function BlogCard({ blog }) {
             </div>
 
             <div className="flex items-center gap-1">
-              {/* Upvote */}
-              <button
-                id={`upvote-btn-${blog.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toggleUpvote(blog.id);
-                }}
-                className={`p-1.5 rounded-md transition-all hover:bg-secondary ${
-                  isUpvoted ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-                aria-label={isUpvoted ? "Remove upvote" : "Upvote"}
-              >
-                <ThumbsUp className="h-3.5 w-3.5" />
-              </button>
+              {!isAdmin && (
+                <>
+                  {/* Upvote */}
+                  <button
+                    id={`upvote-btn-${blog.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleUpvote(blog.id);
+                    }}
+                    className={`p-1.5 rounded-md transition-all hover:bg-secondary ${
+                      isUpvoted ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    aria-label={isUpvoted ? "Remove upvote" : "Upvote"}
+                  >
+                    <ThumbsUp className="h-3.5 w-3.5" />
+                  </button>
 
-              {/* Downvote */}
-              <button
-                id={`downvote-btn-${blog.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toggleDownvote(blog.id);
-                }}
-                className={`p-1.5 rounded-md transition-all hover:bg-secondary ${
-                  isDownvoted ? "text-destructive" : "text-muted-foreground hover:text-foreground"
-                }`}
-                aria-label={isDownvoted ? "Remove downvote" : "Downvote"}
-              >
-                <ThumbsDown className="h-3.5 w-3.5" />
-              </button>
+                  {/* Downvote */}
+                  <button
+                    id={`downvote-btn-${blog.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleDownvote(blog.id);
+                    }}
+                    className={`p-1.5 rounded-md transition-all hover:bg-secondary ${
+                      isDownvoted ? "text-destructive" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    aria-label={isDownvoted ? "Remove downvote" : "Downvote"}
+                  >
+                    <ThumbsDown className="h-3.5 w-3.5" />
+                  </button>
+                </>
+              )}
 
               {/* Save */}
               <button

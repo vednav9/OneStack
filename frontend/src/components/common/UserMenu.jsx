@@ -4,7 +4,6 @@ import { useAuthStore } from "../../store/authStore";
 import { LogOut, User, Bookmark, Clock, LayoutDashboard } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/Avatar";
 import { Button } from "../ui/Button";
-import { getAdminToken } from "../../services/adminService";
 
 export default function UserMenu() {
   const { user, logout } = useAuthStore();
@@ -24,7 +23,7 @@ export default function UserMenu() {
 
   if (!user) return null;
 
-  const isAdmin = Boolean(getAdminToken());
+  const isAdmin = user?.role === "ADMIN";
 
   const menuItems = [
     { icon: User, label: "Profile", to: `/profile/me` },
@@ -68,7 +67,9 @@ export default function UserMenu() {
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold truncate">{displayName}</p>
-                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                {!isAdmin && user.email && (
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                )}
               </div>
             </div>
           </div>
