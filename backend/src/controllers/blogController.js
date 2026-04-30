@@ -4,6 +4,7 @@ import {
     getBlogById,
     getEmbedStatusByBlogId,
     getBlogSummaryById,
+    softDeleteBlog,
     upvoteBlog,
     removeUpvoteBlog,
     downvoteBlog,
@@ -136,5 +137,18 @@ export async function getBlogContent(req, res) {
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message || "Failed to fetch content" });
+    }
+}
+
+export async function deleteBlog(req, res) {
+    try {
+        const { id } = req.params;
+        const deleted = await softDeleteBlog(id);
+        if (!deleted) {
+            return res.status(404).json({ error: "Blog not found" });
+        }
+        return res.status(204).end();
+    } catch (err) {
+        return res.status(500).json({ error: err.message || "Failed to delete blog" });
     }
 }

@@ -15,15 +15,15 @@ const blogInclude = {
 
 export async function getUserPreferences(userId) {
     const upvotes = await prisma.blogUpvote.findMany({
-        where: { userId },
+        where: { userId, blog: { deletedAt: null } },
         include: { blog: { include: { tag: { include: { tag: true } } } } },
     });
     const saved = await prisma.savedBlog.findMany({
-        where: { userId },
+        where: { userId, blog: { deletedAt: null } },
         include: { blog: { include: { tag: { include: { tag: true } } } } },
     });
     const history = await prisma.readingHistory.findMany({
-        where: { userId },
+        where: { userId, blog: { deletedAt: null } },
         include: { blog: { include: { tag: { include: { tag: true } } } } },
     });
 
@@ -48,6 +48,7 @@ export async function getRecommendedBlogs(userId) {
 
     if (topTags.length === 0) {
         const blogs = await prisma.blog.findMany({
+            where: { deletedAt: null },
             take: 10,
             orderBy: { createdAt: "desc" },
             include: blogInclude,
@@ -57,6 +58,7 @@ export async function getRecommendedBlogs(userId) {
 
     const blogs = await prisma.blog.findMany({
         where: {
+            deletedAt: null,
             tag: {
                 some: {
                     tag: {

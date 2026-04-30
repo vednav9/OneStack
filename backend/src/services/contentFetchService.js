@@ -164,8 +164,8 @@ export async function fetchFreshContent(blogId) {
         if (cached) return JSON.parse(cached);
     } catch { /* ignore */ }
 
-    const blog = await prisma.blog.findUnique({
-        where: { id: blogId },
+    const blog = await prisma.blog.findFirst({
+        where: { id: blogId, deletedAt: null },
         select: { sourceURL: true, thumbnail: true },
     });
 

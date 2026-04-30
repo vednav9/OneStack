@@ -4,7 +4,7 @@ import { normalizeBlogTags } from "./blogService.js";
 export async function getUserLists(userId) {
     const [upvotedRecords, savedRecords, lists] = await Promise.all([
         prisma.blogUpvote.findMany({
-            where: { userId },
+            where: { userId, blog: { deletedAt: null } },
             orderBy: { id: "desc" },
             include: {
                 blog: {
@@ -16,7 +16,7 @@ export async function getUserLists(userId) {
             },
         }),
         prisma.savedBlog.findMany({
-            where: { userId },
+            where: { userId, blog: { deletedAt: null } },
             orderBy: { id: "desc" },
             include: {
                 blog: {
@@ -31,6 +31,7 @@ export async function getUserLists(userId) {
             where: { userId },
             include: {
                 blogs: {
+                    where: { blog: { deletedAt: null } },
                     include: {
                         blog: {
                             include: {

@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import cors from "cors";
 import passport from "passport";
 import { env } from "./src/config/env.js";
@@ -16,6 +17,7 @@ import tagRoutes from "./src/routes/tagRoutes.js";
 import listRoutes from "./src/routes/listRoutes.js";
 import sourceRoutes from "./src/routes/sourceRoutes.js";
 import commentRoutes from "./src/routes/commentRoutes.js";
+import adminRoutes from "./src/routes/adminRoutes.js";
 import "./src/config/googleStrategy.js";
 
 const enableJobs = process.env.ENABLE_JOBS === "true";
@@ -56,6 +58,9 @@ app.use(express.json());
 app.use(requestLogger);
 app.use(passport.initialize());
 
+// Serve uploaded assets
+app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
+
 // Silence favicon requests from crawlers (e.g. Vercel's vercel-favicon/1.0)
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 app.get("/favicon.png", (req, res) => res.status(204).end());
@@ -74,6 +79,7 @@ app.use("/api/tags", tagRoutes);
 app.use("/api/sources", sourceRoutes);
 app.use("/api/lists", listRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use(errorHandler);
 

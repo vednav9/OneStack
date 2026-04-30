@@ -3,6 +3,7 @@ import { normalizeBlogTags } from "./blogService.js";
 
 export async function getTrendingBlogs() {
     const blogs = await prisma.blog.findMany({
+        where: { deletedAt: null },
         take: 50,
         orderBy: [{ createdAt: "desc" }],
         include: {

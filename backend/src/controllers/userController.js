@@ -5,6 +5,7 @@ import {
     getSavedBlogs,
     getUpvotedBlogs,
     getDownvotedBlogs,
+    deleteUserAccount,
 } from "../services/userService.js";
 
 export async function getProfile(req, res) {
@@ -61,6 +62,32 @@ export async function getUserDownvotes(req, res) {
     try {
         const downvoted = await getDownvotedBlogs(req.user.userId);
         res.json(downvoted);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+export async function deleteProfile(req, res) {
+    try {
+        await deleteUserAccount(req.user.userId);
+        res.status(204).end();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+export async function uploadProfilePhoto(req, res) {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: "Profile photo file is required" });
+        }
+
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        const photoUrl = `${baseUrl}/uploads/avatars/${req.file.filename}`;
+
+        const updated = await updateUser(req.user.userId, { userPhoto: photoUrl });
+        const { password, ...safe } = updated;
+        res.json(safe);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

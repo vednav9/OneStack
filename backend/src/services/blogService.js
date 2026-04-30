@@ -28,6 +28,7 @@ export function normalizeBlogTags(blog) {
 
 export async function getAllBlogs() {
     const blogs = await prisma.blog.findMany({
+        where: { deletedAt: null },
         select: {
             id: true,
             title: true,
@@ -49,8 +50,8 @@ export async function getAllBlogs() {
 }
 
 export async function getBlogById(id) {
-    const blog = await prisma.blog.findUnique({
-        where: { id },
+    const blog = await prisma.blog.findFirst({
+        where: { id, deletedAt: null },
         include: {
             tag: { include: { tag: true } },
             _count: { select: { upvotes: true, downvotes: true, history: true } },
@@ -62,8 +63,8 @@ export async function getBlogById(id) {
 }
 
 export async function getEmbedStatusByBlogId(id) {
-    const blog = await prisma.blog.findUnique({
-        where: { id },
+    const blog = await prisma.blog.findFirst({
+        where: { id, deletedAt: null },
         select: { sourceURL: true },
     });
 
@@ -211,8 +212,8 @@ function cleanGeminiJson(raw = "") {
 }
 
 export async function getBlogSummaryById(id) {
-    const blog = await prisma.blog.findUnique({
-        where: { id },
+    const blog = await prisma.blog.findFirst({
+        where: { id, deletedAt: null },
         select: {
             id: true,
             title: true,
@@ -381,6 +382,14 @@ export async function addToHistory(userId, blogId) {
     return prisma.readingHistory.create({
         data: { userId, blogId },
     });
+}
+
+export async function softDeleteBlog(blogId) {
+    const result = await prisma.blog.updateMany({
+        where: { id: blogId, deletedAt: null },
+        data: { deletedAt: new Date() },
+    });
+    return result.count > 0;
 }
 
 export async function createList(userId, name) {

@@ -21,3 +21,15 @@ export function generateRefreshToken(userId) {
 export function verifyAccessToken(token){
     return jwt.verify(token, env.jwtSecret);
 }
+
+export function generateAdminToken(adminId) {
+    return jwt.sign(
+        { adminId },
+        env.adminJwtSecret,
+        { expiresIn: "8h" }
+    );
+}
+
+export function verifyAdminToken(token) {
+    return jwt.verify(token, env.adminJwtSecret);
+}
