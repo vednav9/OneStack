@@ -7,6 +7,7 @@ import {
     getDownvotedBlogs,
     deleteUserAccount,
 } from "../services/userService.js";
+import { uploadAvatarToR2 } from "../services/r2Service.js";
 
 export async function getProfile(req, res) {
     try {
@@ -82,9 +83,7 @@ export async function uploadProfilePhoto(req, res) {
             return res.status(400).json({ error: "Profile photo file is required" });
         }
 
-        const baseUrl = `${req.protocol}://${req.get("host")}`;
-        const photoUrl = `${baseUrl}/uploads/avatars/${req.file.filename}`;
-
+        const { url: photoUrl } = await uploadAvatarToR2(req.file, req.user.userId);
         const updated = await updateUser(req.user.userId, { userPhoto: photoUrl });
         const { password, ...safe } = updated;
         res.json(safe);
