@@ -4,8 +4,10 @@ import {
     getBlogById,
     getEmbedStatusByBlogId,
     getBlogSummaryById,
-    likeBlog,
-    unlikeBlog,
+    upvoteBlog,
+    removeUpvoteBlog,
+    downvoteBlog,
+    removeDownvoteBlog,
     saveBlog,
     unsaveBlog,
 } from "../services/blogService.js";
@@ -50,21 +52,41 @@ export async function unsaveBlogController(req, res) {
     }
 }
 
-export async function likeBlogController(req, res) {
+export async function upvoteBlogController(req, res) {
     try {
         const { id } = req.params;
-        const result = await likeBlog(req.user.userId, id);
-        res.json({ liked: true, ...result });
+        const result = await upvoteBlog(req.user.userId, id);
+        res.json({ upvoted: true, ...result });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
 
-export async function unlikeBlogController(req, res) {
+export async function removeUpvoteBlogController(req, res) {
     try {
         const { id } = req.params;
-        await unlikeBlog(req.user.userId, id);
-        res.json({ liked: false });
+        await removeUpvoteBlog(req.user.userId, id);
+        res.json({ upvoted: false });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+export async function downvoteBlogController(req, res) {
+    try {
+        const { id } = req.params;
+        const result = await downvoteBlog(req.user.userId, id);
+        res.json({ downvoted: true, ...result });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+export async function removeDownvoteBlogController(req, res) {
+    try {
+        const { id } = req.params;
+        await removeDownvoteBlog(req.user.userId, id);
+        res.json({ downvoted: false });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -1,4 +1,11 @@
-import { getUserById, updateUser, getHistory, getSavedBlogs } from "../services/userService.js";
+import {
+    getUserById,
+    updateUser,
+    getHistory,
+    getSavedBlogs,
+    getUpvotedBlogs,
+    getDownvotedBlogs,
+} from "../services/userService.js";
 
 export async function getProfile(req, res) {
     try {
@@ -36,6 +43,24 @@ export async function getUserSaved(req, res) {
     try {
         const saved = await getSavedBlogs(req.user.userId);
         res.json(saved);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+export async function getUserUpvotes(req, res) {
+    try {
+        const upvoted = await getUpvotedBlogs(req.user.userId);
+        res.json(upvoted);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+export async function getUserDownvotes(req, res) {
+    try {
+        const downvoted = await getDownvotedBlogs(req.user.userId);
+        res.json(downvoted);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
