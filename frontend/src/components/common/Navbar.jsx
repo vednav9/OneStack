@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Bell, Menu, X, Moon, Sun, Compass } from "lucide-react";
+import { Search, Bell, Menu, X, Moon, Sun } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { useThemeStore } from "../../store/themeStore";
 import { Button } from "../ui/Button";
 import UserMenu from "./UserMenu";
 import Notifications from "./Notifications";
-import AdminMenu from "./AdminMenu";
-import { getAdminToken } from "../../services/adminService";
 
 export default function Navbar({ onMenuClick }) {
   const { user } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
-  const isAdmin = Boolean(getAdminToken());
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -50,8 +47,8 @@ export default function Navbar({ onMenuClick }) {
           className="flex items-center gap-2 font-bold text-xl shrink-0"
           id="logo-link"
         >
-          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary">
-            <Compass className="h-4 w-4 text-primary-foreground" />
+          <div className="flex items-center justify-center w-7 h-7 rounded-lg overflow-hidden">
+            <img src="/logo.png" alt="OneStack logo" className="h-7 w-7" />
           </div>
           <span className="text-gradient-red hidden sm:block">OneStack</span>
         </Link>
@@ -115,11 +112,6 @@ export default function Navbar({ onMenuClick }) {
               {/* Notifications */}
               <Notifications />
               <UserMenu />
-            </>
-          ) : isAdmin ? (
-            <>
-              <Notifications />
-              <AdminMenu />
             </>
           ) : (
             <div className="flex items-center gap-2">

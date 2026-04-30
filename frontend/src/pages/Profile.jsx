@@ -139,7 +139,7 @@ export default function Profile() {
 
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">{displayName}</h1>
-              {displayProfile?.email && (
+              {displayProfile?.email && displayProfile?.role !== "ADMIN" && (
                 <p className="text-lg text-muted-foreground mt-1 font-medium">{displayProfile.email}</p>
               )}
             </div>
