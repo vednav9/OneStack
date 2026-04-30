@@ -14,9 +14,15 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id String @id @default(uuid())
   email String @unique
+  role UserRole @default(USER)
   name String?
   password String?
   googleId String?
@@ -33,6 +39,7 @@ model User {
   comments Comment[]
   commentUpvotes CommentUpvote[] @relation("UserCommentUpvotes")
   commentDownvotes CommentDownvote[] @relation("UserCommentDownvotes")
+  adminProfile AdminUser?
 }
 
 model RefreshToken {
@@ -56,6 +63,7 @@ model Blog {
   readTime Int?
   thumbnail String?
   createdAt DateTime @default(now())
+  deletedAt DateTime?
 
   searchVector Unsupported("tsvector")?
 
@@ -194,4 +202,14 @@ model FollowedTopic {
 
   user User @relation(fields:[userId],references:[id])
   tag Tag @relation(fields:[tagId],references:[id])
+}
+
+model AdminUser {
+  id String @id @default(uuid())
+  username String @unique
+  passwordHash String
+  userId String? @unique
+  user User? @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
