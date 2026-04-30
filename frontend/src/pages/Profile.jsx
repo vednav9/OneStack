@@ -1,29 +1,88 @@
 import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/authStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/Avatar";
 import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
 import { Settings, Bookmark, ThumbsUp, Clock, Calendar } from "lucide-react";
-import BlogFeed from "../components/blog/BlogFeed";
 import useDocumentTitle from "../hooks/useDocumentTitle";
+import api from "../services/api";
 
 export default function Profile() {
   const { username } = useParams();
-  const { user } = useAuthStore();
+  const { user, fetchUser } = useAuthStore();
+  const [profile, setProfile] = useState(user);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formState, setFormState] = useState({ name: "", userPhoto: "" });
 
   // For now, only own profile is shown (no public profiles API yet)
   const isOwnProfile = !username || username === "me" || user?.name === username;
-  const profile = isOwnProfile ? user : null;
-  const displayName = profile?.name || username || "User";
+  const displayProfile = isOwnProfile ? profile : null;
+  const displayName = displayProfile?.name || username || "User";
 
   useDocumentTitle(`${displayName} | Profile`);
 
-  const savedCount = profile?._count?.savedBlogs ?? 0;
-  const likedCount = profile?._count?.likedBlogs ?? 0;
-  const historyCount = profile?._count?.readingHistory ?? 0;
+  useEffect(() => {
+    if (!isOwnProfile) return;
+    setProfile(user);
+  }, [isOwnProfile, user]);
 
-  const joinedDate = profile?.createdAt
-    ? new Date(profile.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  useEffect(() => {
+    if (!isOwnProfile) return;
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetchUser()
+      .then((data) => {
+        if (!cancelled && data) setProfile(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message || "Failed to load profile.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [fetchUser, isOwnProfile]);
+
+  useEffect(() => {
+    if (!displayProfile) return;
+    setFormState({
+      name: displayProfile.name || "",
+      userPhoto: displayProfile.userPhoto || "",
+    });
+  }, [displayProfile]);
+
+  const savedCount = displayProfile?._count?.savedBlogs ?? 0;
+  const upvotedCount = displayProfile?._count?.blogUpvotes ?? 0;
+  const historyCount = displayProfile?._count?.readingHistory ?? 0;
+
+  const joinedDate = displayProfile?.createdAt
+    ? new Date(displayProfile.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
     : null;
+
+  async function handleSaveProfile() {
+    if (!isOwnProfile) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const payload = {
+        name: formState.name.trim() || null,
+        userPhoto: formState.userPhoto.trim() || null,
+      };
+      const updated = await api.put("/user/profile", payload);
+      setProfile(updated);
+      useAuthStore.setState({ user: updated });
+      setIsEditing(false);
+    } catch (err) {
+      setError(err.message || "Failed to update profile.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
@@ -35,7 +94,7 @@ export default function Profile() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex flex-col gap-4">
             <Avatar className="h-32 w-32 border-4 border-background bg-card shadow-lg ring-offset-background">
-              <AvatarImage src={profile?.userPhoto} />
+              <AvatarImage src={displayProfile?.userPhoto} />
               <AvatarFallback className="text-4xl font-bold bg-primary/10 text-primary">
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -43,17 +102,21 @@ export default function Profile() {
 
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">{displayName}</h1>
-              {profile?.email && (
-                <p className="text-lg text-muted-foreground mt-1 font-medium">{profile.email}</p>
+              {displayProfile?.email && (
+                <p className="text-lg text-muted-foreground mt-1 font-medium">{displayProfile.email}</p>
               )}
             </div>
           </div>
 
           <div className="flex gap-3">
             {isOwnProfile ? (
-              <Button variant="outline" className="rounded-full shadow-sm px-6 h-11 border-border bg-card hover:bg-secondary">
+              <Button
+                variant="outline"
+                className="rounded-full shadow-sm px-6 h-11 border-border bg-card hover:bg-secondary"
+                onClick={() => setIsEditing((prev) => !prev)}
+              >
                 <Settings className="h-4 w-4 mr-2 text-muted-foreground" />
-                Edit Profile
+                {isEditing ? "Close" : "Edit Profile"}
               </Button>
             ) : (
               <Button className="rounded-full px-8 h-11 text-base shadow-sm">Follow</Button>
@@ -71,6 +134,51 @@ export default function Profile() {
           )}
         </div>
 
+        {error && (
+          <p className="mt-4 text-sm text-destructive">{error}</p>
+        )}
+
+        {isOwnProfile && isEditing && (
+          <div className="mt-6 rounded-2xl border bg-card p-6 space-y-4 animate-fade-in">
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</label>
+              <Input
+                value={formState.name}
+                onChange={(e) => setFormState((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="Your name"
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Profile photo URL</label>
+              <Input
+                value={formState.userPhoto}
+                onChange={(e) => setFormState((prev) => ({ ...prev, userPhoto: e.target.value }))}
+                placeholder="https://..."
+                className="mt-2"
+              />
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={handleSaveProfile} isLoading={saving}>
+                Save changes
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setIsEditing(false);
+                  setFormState({
+                    name: displayProfile?.name || "",
+                    userPhoto: displayProfile?.userPhoto || "",
+                  });
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="flex gap-8 mt-8 border-b pb-8">
           <div className="flex flex-col items-center gap-1">
@@ -83,9 +191,9 @@ export default function Profile() {
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-1.5">
               <ThumbsUp className="h-4 w-4 text-primary" />
-              <span className="text-2xl font-bold">{likedCount}</span>
+              <span className="text-2xl font-bold">{upvotedCount}</span>
             </div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Liked</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Upvoted</span>
           </div>
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-1.5">
@@ -99,8 +207,14 @@ export default function Profile() {
 
       {/* No articles section for now */}
       <div className="px-4 text-center text-muted-foreground py-10">
-        <p className="text-sm">Article history and liked posts will appear here.</p>
-        <p className="text-xs mt-1">Start reading to build your collection.</p>
+        {loading ? (
+          <p className="text-sm">Loading profile...</p>
+        ) : (
+          <>
+            <p className="text-sm">Article history and upvoted posts will appear here.</p>
+            <p className="text-xs mt-1">Start reading to build your collection.</p>
+          </>
+        )}
       </div>
     </div>
   );

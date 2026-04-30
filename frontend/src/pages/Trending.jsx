@@ -6,7 +6,7 @@ import useDocumentTitle from "../hooks/useDocumentTitle";
 export default function Trending() {
   useDocumentTitle("Trending");
   // useBlogs("trending") hits /recommendation/trending which the backend already
-  // sorts by (likedBy + history count), so no extra client-side sort needed.
+  // sorts by score (upvotes - downvotes), then upvotes and reads.
   const { blogs, loading, error, refresh } = useBlogs("trending");
 
   return (

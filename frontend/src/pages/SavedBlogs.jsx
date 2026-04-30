@@ -23,7 +23,10 @@ export default function SavedBlogs() {
     setLoading(true);
     api.get("/user/saved")
       .then((data) => {
-        setSaved(Array.isArray(data) ? data : []);
+        const normalized = Array.isArray(data)
+          ? data.map((item) => item?.blog ?? item)
+          : [];
+        setSaved(normalized);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));

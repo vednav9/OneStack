@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import BlogHeader from "../components/blog/BlogHeader";
 import BlogActions from "../components/blog/BlogActions";
 import SuggestedBlogs from "../components/blog/SuggestedBlogs";
+import CommentsSection from "../components/blog/CommentsSection";
 import ReadingControls from "../components/blog/ReadingControls";
 import { Skeleton } from "../components/ui/Skeleton";
 import useBlog from "../hooks/useBlog";
@@ -600,6 +601,8 @@ export default function BlogPage() {
         <div className="mt-16">
           <BlogActions blog={blog} />
         </div>
+
+        <CommentsSection blogId={blog?.id} />
 
         {suggested.length > 0 && (
           <div className="mt-20">

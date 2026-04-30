@@ -23,7 +23,10 @@ export default function History() {
     setLoading(true);
     api.get("/user/history")
       .then((data) => {
-        setHistory(Array.isArray(data) ? data : []);
+        const normalized = Array.isArray(data)
+          ? data.map((item) => item?.blog ?? item)
+          : [];
+        setHistory(normalized);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
