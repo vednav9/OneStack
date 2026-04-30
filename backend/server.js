@@ -14,6 +14,8 @@ import searchRoutes from "./src/routes/searchRoutes.js";
 import recommendationRoutes from "./src/routes/recommendationRoutes.js";
 import tagRoutes from "./src/routes/tagRoutes.js";
 import listRoutes from "./src/routes/listRoutes.js";
+import sourceRoutes from "./src/routes/sourceRoutes.js";
+import commentRoutes from "./src/routes/commentRoutes.js";
 import "./src/config/googleStrategy.js";
 
 const enableJobs = process.env.ENABLE_JOBS === "true";
@@ -69,7 +71,9 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/recommendation", recommendationRoutes);
 app.use("/api/tags", tagRoutes);
+app.use("/api/sources", sourceRoutes);
 app.use("/api/lists", listRoutes);
+app.use("/api/comments", commentRoutes);
 
 app.use(errorHandler);
 
