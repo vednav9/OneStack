@@ -31,12 +31,18 @@ export function unsaveBlog(id) {
     return apiRequest(`/blogs/${id}/save`, { method: "DELETE" });
 }
 
-// Toggle like — POST to like, DELETE to unlike
-export function likeBlog(id) {
-    return apiRequest(`/blogs/${id}/like`, { method: "POST" });
+// Toggle upvote/downvote
+export function upvoteBlog(id) {
+    return apiRequest(`/blogs/${id}/upvote`, { method: "POST" });
 }
-export function unlikeBlog(id) {
-    return apiRequest(`/blogs/${id}/like`, { method: "DELETE" });
+export function removeUpvoteBlog(id) {
+    return apiRequest(`/blogs/${id}/upvote`, { method: "DELETE" });
+}
+export function downvoteBlog(id) {
+    return apiRequest(`/blogs/${id}/downvote`, { method: "POST" });
+}
+export function removeDownvoteBlog(id) {
+    return apiRequest(`/blogs/${id}/downvote`, { method: "DELETE" });
 }
 
 // Add to history

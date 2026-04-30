@@ -13,6 +13,16 @@ export default function useBlogs(type = "all") {
     const [error, setError] = useState(null);
     const sortMode = useFeedStore((state) => state.sortMode);
 
+    const sortByScore = (a, b) => {
+        const scoreA = (a?.score ?? ((a?.upvotes ?? 0) - (a?.downvotes ?? 0)));
+        const scoreB = (b?.score ?? ((b?.upvotes ?? 0) - (b?.downvotes ?? 0)));
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        const upA = a?.upvotes ?? 0;
+        const upB = b?.upvotes ?? 0;
+        if (upB !== upA) return upB - upA;
+        return new Date(b?.publishedAt || b?.createdAt || 0).getTime() - new Date(a?.publishedAt || a?.createdAt || 0).getTime();
+    };
+
     const loadBlogs = useCallback(async () => {
         try {
             setLoading(true);
@@ -68,6 +78,8 @@ export default function useBlogs(type = "all") {
                     const bTime = new Date(b?.publishedAt || 0).getTime();
                     return bTime - aTime;
                 });
+            } else if (type === "trending" || type === "feed" || type === "recommended" || sortMode === "relevant") {
+                blogArray = [...blogArray].sort(sortByScore);
             }
             
             setBlogs(blogArray);
@@ -92,11 +104,19 @@ export default function useBlogs(type = "all") {
         }
     }
 
-    async function handleLike(id) {
+    async function handleUpvote(id) {
         try {
-             await blogService.likeBlog(id);
+            await blogService.upvoteBlog(id);
         } catch (err) {
-             console.error("Failed to like blog", err);
+            console.error("Failed to upvote blog", err);
+        }
+    }
+
+    async function handleDownvote(id) {
+        try {
+            await blogService.downvoteBlog(id);
+        } catch (err) {
+            console.error("Failed to downvote blog", err);
         }
     }
 
@@ -106,6 +126,7 @@ export default function useBlogs(type = "all") {
         error,
         refresh: loadBlogs,
         handleSave,
-        handleLike,
+        handleUpvote,
+        handleDownvote,
     };
 }

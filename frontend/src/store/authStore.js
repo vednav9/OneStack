@@ -106,7 +106,7 @@ const useAuthStore = create(
         try {
           const userData = await api.get("/user/profile");
           set({ user: userData, isLoading: false });
-          // Sync saved/liked state from backend
+          // Sync saved/vote state from backend
           try {
             const { useBlogStore } = await import("./blogStore");
             useBlogStore.getState().syncFromServer();
