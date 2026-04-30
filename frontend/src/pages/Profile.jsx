@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/authStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/Avatar";
@@ -7,16 +7,21 @@ import { Input } from "../components/ui/Input";
 import { Settings, Bookmark, ThumbsUp, Clock, Calendar } from "lucide-react";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import api from "../services/api";
+import { uploadProfilePhoto } from "../services/userService";
 
 export default function Profile() {
   const { username } = useParams();
-  const { user, fetchUser } = useAuthStore();
+  const navigate = useNavigate();
+  const { user, fetchUser, logout } = useAuthStore();
   const [profile, setProfile] = useState(user);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [formState, setFormState] = useState({ name: "", userPhoto: "" });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [formState, setFormState] = useState({ name: "" });
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
 
   // For now, only own profile is shown (no public profiles API yet)
   const isOwnProfile = !username || username === "me" || user?.name === username;
@@ -52,9 +57,18 @@ export default function Profile() {
     if (!displayProfile) return;
     setFormState({
       name: displayProfile.name || "",
-      userPhoto: displayProfile.userPhoto || "",
     });
   }, [displayProfile]);
+
+  useEffect(() => {
+    if (!photoFile) {
+      setPhotoPreview("");
+      return;
+    }
+    const previewUrl = URL.createObjectURL(photoFile);
+    setPhotoPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [photoFile]);
 
   const savedCount = displayProfile?._count?.savedBlogs ?? 0;
   const upvotedCount = displayProfile?._count?.blogUpvotes ?? 0;
@@ -69,9 +83,15 @@ export default function Profile() {
     setSaving(true);
     setError(null);
     try {
+      if (photoFile) {
+        const updatedPhoto = await uploadProfilePhoto(photoFile);
+        setProfile(updatedPhoto);
+        useAuthStore.setState({ user: updatedPhoto });
+        setPhotoFile(null);
+        setPhotoPreview("");
+      }
       const payload = {
         name: formState.name.trim() || null,
-        userPhoto: formState.userPhoto.trim() || null,
       };
       const updated = await api.put("/user/profile", payload);
       setProfile(updated);
@@ -81,6 +101,23 @@ export default function Profile() {
       setError(err.message || "Failed to update profile.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteProfile() {
+    if (!isOwnProfile || isDeleting) return;
+    const confirmed = window.confirm("This will permanently delete your account and data. Continue?");
+    if (!confirmed) return;
+    setIsDeleting(true);
+    setError(null);
+    try {
+      await api.del("/user/profile");
+      await logout();
+      navigate("/");
+    } catch (err) {
+      setError(err.message || "Failed to delete account.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -150,13 +187,23 @@ export default function Profile() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Profile photo URL</label>
-              <Input
-                value={formState.userPhoto}
-                onChange={(e) => setFormState((prev) => ({ ...prev, userPhoto: e.target.value }))}
-                placeholder="https://..."
-                className="mt-2"
-              />
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Profile photo</label>
+              <div className="mt-2 flex items-center gap-4">
+                <Avatar className="h-14 w-14 border bg-card">
+                  <AvatarImage src={photoPreview || displayProfile?.userPhoto} />
+                  <AvatarFallback className="text-sm font-semibold bg-primary/10 text-primary">
+                    {displayName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <Input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">PNG, JPG, or WEBP up to 2MB.</p>
+                </div>
+              </div>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button onClick={handleSaveProfile} isLoading={saving}>
@@ -169,11 +216,24 @@ export default function Profile() {
                   setIsEditing(false);
                   setFormState({
                     name: displayProfile?.name || "",
-                    userPhoto: displayProfile?.userPhoto || "",
                   });
+                  setPhotoFile(null);
+                  setPhotoPreview("");
                 }}
               >
                 Cancel
+              </Button>
+            </div>
+
+            <div className="pt-4 border-t">
+              <p className="text-xs text-muted-foreground mb-3">Danger zone</p>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDeleteProfile}
+                isLoading={isDeleting}
+              >
+                Delete account
               </Button>
             </div>
           </div>
@@ -205,17 +265,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* No articles section for now */}
-      <div className="px-4 text-center text-muted-foreground py-10">
-        {loading ? (
-          <p className="text-sm">Loading profile...</p>
-        ) : (
-          <>
-            <p className="text-sm">Article history and upvoted posts will appear here.</p>
-            <p className="text-xs mt-1">Start reading to build your collection.</p>
-          </>
-        )}
-      </div>
     </div>
   );
 }

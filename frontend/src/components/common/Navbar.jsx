@@ -6,10 +6,13 @@ import { useThemeStore } from "../../store/themeStore";
 import { Button } from "../ui/Button";
 import UserMenu from "./UserMenu";
 import Notifications from "./Notifications";
+import AdminMenu from "./AdminMenu";
+import { getAdminToken } from "../../services/adminService";
 
 export default function Navbar({ onMenuClick }) {
   const { user } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
+  const isAdmin = Boolean(getAdminToken());
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -112,6 +115,11 @@ export default function Navbar({ onMenuClick }) {
               {/* Notifications */}
               <Notifications />
               <UserMenu />
+            </>
+          ) : isAdmin ? (
+            <>
+              <Notifications />
+              <AdminMenu />
             </>
           ) : (
             <div className="flex items-center gap-2">

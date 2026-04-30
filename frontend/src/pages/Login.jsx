@@ -3,7 +3,19 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
-import { Compass, ArrowRight, Chrome } from "lucide-react";
+import { Compass, ArrowRight } from "lucide-react";
+
+function GoogleIcon() {
+  return (
+    <img
+      src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+      alt=""
+      className="h-5 w-5"
+      referrerPolicy="no-referrer"
+      loading="lazy"
+    />
+  );
+}
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -131,20 +143,25 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Google OAuth */}
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full h-11 flex items-center justify-center gap-3 rounded-lg border bg-background hover:bg-secondary transition-colors text-sm font-medium"
+            className="w-full h-11 flex items-center justify-center gap-3 rounded-full border border-white/10 bg-[#0f0f10] text-white hover:bg-[#16171a] transition-colors text-sm font-semibold shadow-sm"
           >
-            <Chrome className="h-4 w-4 text-blue-500" />
-            Sign in with Google
+            <GoogleIcon />
+            Continue with Google
           </button>
 
           <div className="mt-8 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link to="/register" className="text-primary font-medium hover:underline underline-offset-4 transition-colors">
               Create an account
+            </Link>
+          </div>
+          <div className="mt-6 text-center text-xs text-muted-foreground">
+            Are you an admin?{" "}
+            <Link to="/admin/login" className="text-primary font-semibold hover:underline underline-offset-4 transition-colors">
+              Admin login
             </Link>
           </div>
         </div>

@@ -1,15 +1,42 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/Card";
-import { Users, FileText, Activity, Server, AlertTriangle } from "lucide-react";
-import { useAuthStore } from "../../store/authStore";
-import { Navigate } from "react-router-dom";
+import { Loader2, Users, FileText, Activity, Server, AlertTriangle } from "lucide-react";
+import { clearAdminToken, getAdminToken, verifyAdminToken } from "../../services/adminService";
 
 export default function AdminDashboard() {
-  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const [checkingAccess, setCheckingAccess] = useState(true);
 
-  // Basic role check (mocked for now)
-  if (!user || user.role !== "ADMIN") {
-    // In a real app we might redirect to / if not admin
-    // return <Navigate to="/" />;
+  useEffect(() => {
+    const token = getAdminToken();
+    if (!token) {
+      navigate("/admin/login", { replace: true });
+      return;
+    }
+
+    let cancelled = false;
+    verifyAdminToken(token)
+      .then(() => {
+        if (!cancelled) setCheckingAccess(false);
+      })
+      .catch(() => {
+        clearAdminToken();
+        if (!cancelled) navigate("/", { replace: true });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
+
+  if (checkingAccess) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+        Verifying admin access...
+      </div>
+    );
   }
 
   const stats = [

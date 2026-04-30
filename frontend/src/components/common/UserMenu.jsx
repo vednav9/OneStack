@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
-import { LogOut, User, LayoutDashboard, Settings, Bookmark, Clock } from "lucide-react";
+import { LogOut, User, Bookmark, Clock, LayoutDashboard } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/Avatar";
 import { Button } from "../ui/Button";
+import { getAdminToken } from "../../services/adminService";
 
 export default function UserMenu() {
   const { user, logout } = useAuthStore();
@@ -23,12 +24,13 @@ export default function UserMenu() {
 
   if (!user) return null;
 
+  const isAdmin = Boolean(getAdminToken());
+
   const menuItems = [
     { icon: User, label: "Profile", to: `/profile/me` },
     { icon: Bookmark, label: "Saved", to: "/saved" },
     { icon: Clock, label: "History", to: "/history" },
-    { icon: LayoutDashboard, label: "Dashboard", to: "/admin" },
-    { icon: Settings, label: "Settings", to: "/settings" },
+    ...(isAdmin ? [{ icon: LayoutDashboard, label: "Dashboard", to: "/admin" }] : []),
   ];
 
   const displayName = user.name || user.email || "User";
@@ -39,12 +41,13 @@ export default function UserMenu() {
       <Button
         id="user-menu-btn"
         variant="ghost"
+        size="icon"
         className="relative h-9 w-9 rounded-full p-0 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-label="User menu"
       >
-        <Avatar className="h-8 w-8">
+        <Avatar className="h-7 w-7">
           <AvatarImage src={avatarSrc} alt={displayName} />
           <AvatarFallback className="bg-primary/10 text-primary font-semibold">
             {displayName.charAt(0).toUpperCase()}

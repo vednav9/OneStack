@@ -63,14 +63,39 @@ const useAuthStore = create(
         }
       },
 
+      loginAdmin: async (username, password) => {
+        set({ user: null, isLoading: true, error: null });
+        try {
+          const { accessToken, refreshToken } = await api.post("/admin/login", { username, password });
+          persistTokens(accessToken, refreshToken);
+          set({ token: accessToken, refreshToken: refreshToken || null });
+          const profile = await get().fetchUser();
+          if (!profile) {
+            throw new Error("Unable to complete admin sign in. Please try again.");
+          }
+          if (profile.role !== "ADMIN") {
+            throw new Error("Admin access required");
+          }
+          return profile;
+        } catch (error) {
+          clearPersistedAuth();
+          set({ user: null, token: null, refreshToken: null, error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
       loginWithGoogle: async (token, refreshToken) => {
+        return get().loginWithTokens(token, refreshToken, "Unable to complete Google sign in. Please try again.");
+      },
+
+      loginWithTokens: async (token, refreshToken, failureMessage = "Unable to complete sign in. Please try again.") => {
         set({ user: null, isLoading: true, error: null });
         try {
           persistTokens(token, refreshToken);
           set({ token, refreshToken: refreshToken || null });
           const profile = await get().fetchUser();
           if (!profile) {
-            throw new Error("Unable to complete Google sign in. Please try again.");
+            throw new Error(failureMessage);
           }
           return profile;
         } catch (error) {

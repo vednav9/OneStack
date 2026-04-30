@@ -5,6 +5,18 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Compass, Sparkles } from "lucide-react";
 
+function GoogleIcon() {
+  return (
+    <img
+      src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+      alt=""
+      className="h-5 w-5"
+      referrerPolicy="no-referrer"
+      loading="lazy"
+    />
+  );
+}
+
 export default function Register() {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState(null);
@@ -22,6 +34,11 @@ export default function Register() {
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
     }
+  };
+
+  const handleGoogleLogin = () => {
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   return (
@@ -110,6 +127,25 @@ export default function Register() {
               Create Account
             </Button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-card/80 px-3 text-xs text-muted-foreground uppercase tracking-wider">or continue with</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full h-11 flex items-center justify-center gap-3 rounded-full border border-white/10 bg-[#0f0f10] text-white hover:bg-[#16171a] transition-colors text-sm font-semibold shadow-sm"
+          >
+            <GoogleIcon />
+            Continue with Google
+          </button>
 
           <div className="mt-8 text-center text-sm text-muted-foreground">
             Already have an account?{" "}

@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import TopicPage from "./pages/TopicPage";
 import SearchPage from "./pages/SearchPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminLogin from "./pages/admin/AdminLogin";
 import NotFound from "./pages/NotFound";
 import { useAuthStore } from "./store/authStore";
 
@@ -58,6 +59,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/auth" element={<AuthCallback />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
 
         {/* Main app with layout */}
         <Route element={<MainLayout />}>
@@ -73,7 +75,7 @@ export default function App() {
           <Route path="/profile/:username" element={<RequireAuth><Profile /></RequireAuth>} />
           <Route path="/topic/:topic" element={<TopicPage />} />
           <Route path="/search" element={<SearchPage />} />
-          <Route path="/admin" element={<RequireAuth><AdminDashboard /></RequireAuth>} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
