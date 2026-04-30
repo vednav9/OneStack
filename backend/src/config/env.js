@@ -9,6 +9,7 @@ export const env={
     jwtRefreshSecret: process.env.JWT_REFRESH_SECRET,
     adminJwtSecret: process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET,
     frontendUrl: process.env.FRONTEND_URL,
+    googleCallbackUrl: process.env.GOOGLE_CALLBACK_URL,
     geminiApiKey: process.env.GEMINI_API_KEY,
     geminiModel: process.env.GEMINI_MODEL || "gemini-2.0-flash",
     r2AccountId: process.env.R2_ACCOUNT_ID,
