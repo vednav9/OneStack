@@ -73,7 +73,10 @@ passport.use(
                     }
                 }
             } else {
-                const shouldUpdatePhoto = !user.userPhoto || /googleusercontent\.com/i.test(user.userPhoto);
+                const shouldUpdatePhoto =
+                    !user.userPhoto ||
+                    /googleusercontent\.com/i.test(user.userPhoto) ||
+                    /\/uploads\//i.test(user.userPhoto);
                 let nextPhoto = user.userPhoto;
 
                 if (shouldUpdatePhoto && userPhoto) {
