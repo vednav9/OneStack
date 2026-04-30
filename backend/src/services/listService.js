@@ -2,15 +2,15 @@ import prisma from "../config/db.js";
 import { normalizeBlogTags } from "./blogService.js";
 
 export async function getUserLists(userId) {
-    const [likedRecords, savedRecords, lists] = await Promise.all([
-        prisma.likedBlog.findMany({
+    const [upvotedRecords, savedRecords, lists] = await Promise.all([
+        prisma.blogUpvote.findMany({
             where: { userId },
             orderBy: { id: "desc" },
             include: {
                 blog: {
                     include: {
                         tag: { include: { tag: true } },
-                        _count: { select: { likedBy: true, history: true } },
+                        _count: { select: { upvotes: true, downvotes: true, history: true } },
                     },
                 },
             },
@@ -22,7 +22,7 @@ export async function getUserLists(userId) {
                 blog: {
                     include: {
                         tag: { include: { tag: true } },
-                        _count: { select: { likedBy: true, history: true } },
+                        _count: { select: { upvotes: true, downvotes: true, history: true } },
                     },
                 },
             },
@@ -35,7 +35,7 @@ export async function getUserLists(userId) {
                         blog: {
                             include: {
                                 tag: { include: { tag: true } },
-                                _count: { select: { likedBy: true, history: true } },
+                                _count: { select: { upvotes: true, downvotes: true, history: true } },
                             },
                         },
                     },
@@ -49,11 +49,11 @@ export async function getUserLists(userId) {
     const defaultLists = [
         {
             id: "default-like",
-            name: "Like",
+            name: "Upvoted",
             userId,
             isDefault: true,
-            count: likedRecords.length,
-            blogs: likedRecords.map((entry) => normalizeBlogTags(entry.blog)),
+            count: upvotedRecords.length,
+            blogs: upvotedRecords.map((entry) => normalizeBlogTags(entry.blog)),
         },
         {
             id: "default-saved",

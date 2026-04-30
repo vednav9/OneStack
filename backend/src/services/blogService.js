@@ -12,13 +12,16 @@ function getEmbedStatusCacheKey(url) {
 
 export function normalizeBlogTags(blog) {
     const tags = blog.tag?.map((entry) => entry.tag.name) || [];
-    const likeCount = blog._count?.likedBy ?? blog.likesCount ?? 0;
+    const upvoteCount = blog._count?.upvotes ?? blog.upvotesCount ?? 0;
+    const downvoteCount = blog._count?.downvotes ?? blog.downvotesCount ?? 0;
     const readCount = blog._count?.history ?? 0;
     const { _count, tag, ...rest } = blog;
     return {
         ...rest,
         tags,
-        likes: likeCount,
+        upvotes: upvoteCount,
+        downvotes: downvoteCount,
+        score: upvoteCount - downvoteCount,
         reads: readCount,
     };
 }
@@ -37,7 +40,7 @@ export async function getAllBlogs() {
             readTime: true,
             thumbnail: true,
             tag: { select: { tag: { select: { name: true } } } },
-            _count: { select: { likedBy: true, history: true } },
+            _count: { select: { upvotes: true, downvotes: true, history: true } },
         },
         orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
     });
@@ -50,7 +53,7 @@ export async function getBlogById(id) {
         where: { id },
         include: {
             tag: { include: { tag: true } },
-            _count: { select: { likedBy: true, history: true } },
+            _count: { select: { upvotes: true, downvotes: true, history: true } },
         },
     });
 
@@ -338,16 +341,38 @@ export async function unsaveBlog(userId, blogId) {
     });
 }
 
-export async function likeBlog(userId, blogId) {
-    return prisma.likedBlog.upsert({
-        where: { userId_blogId: { userId, blogId } },
-        update: {},
-        create: { userId, blogId },
+export async function upvoteBlog(userId, blogId) {
+    const [, vote] = await prisma.$transaction([
+        prisma.blogDownvote.deleteMany({ where: { userId, blogId } }),
+        prisma.blogUpvote.upsert({
+            where: { userId_blogId: { userId, blogId } },
+            update: {},
+            create: { userId, blogId },
+        }),
+    ]);
+    return vote;
+}
+
+export async function removeUpvoteBlog(userId, blogId) {
+    return prisma.blogUpvote.deleteMany({
+        where: { userId, blogId },
     });
 }
 
-export async function unlikeBlog(userId, blogId) {
-    return prisma.likedBlog.deleteMany({
+export async function downvoteBlog(userId, blogId) {
+    const [, vote] = await prisma.$transaction([
+        prisma.blogUpvote.deleteMany({ where: { userId, blogId } }),
+        prisma.blogDownvote.upsert({
+            where: { userId_blogId: { userId, blogId } },
+            update: {},
+            create: { userId, blogId },
+        }),
+    ]);
+    return vote;
+}
+
+export async function removeDownvoteBlog(userId, blogId) {
+    return prisma.blogDownvote.deleteMany({
         where: { userId, blogId },
     });
 }

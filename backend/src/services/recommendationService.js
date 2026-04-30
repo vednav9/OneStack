@@ -6,14 +6,15 @@ const blogInclude = {
     tag: { include: { tag: true } },
     _count: {
         select: {
-            likedBy: true,
+            upvotes: true,
+            downvotes: true,
             history: true,
         },
     },
 };
 
 export async function getUserPreferences(userId) {
-    const likes = await prisma.likedBlog.findMany({
+    const upvotes = await prisma.blogUpvote.findMany({
         where: { userId },
         include: { blog: { include: { tag: { include: { tag: true } } } } },
     });
@@ -29,7 +30,7 @@ export async function getUserPreferences(userId) {
     // Extract tag preferences
     const tagCount = {};
 
-    [...likes, ...saved, ...history].forEach((item) => {
+    [...upvotes, ...saved, ...history].forEach((item) => {
         item.blog.tag.forEach((t) => {
             const tagName = t.tag.name;
             tagCount[tagName] = (tagCount[tagName] || 0) + 1;

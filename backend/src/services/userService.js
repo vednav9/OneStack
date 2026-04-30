@@ -6,7 +6,7 @@ export async function getUserById(id) {
         where: { id },
         include: {
             _count: {
-                select: { savedBlogs: true, likedBlogs: true, readingHistory: true }
+                select: { savedBlogs: true, blogUpvotes: true, blogDownvotes: true, readingHistory: true }
             }
         }
     });
@@ -34,7 +34,7 @@ export async function getHistory(userId) {
             blog: {
                 include: {
                     tag: { include: { tag: true } },
-                    _count: { select: { likedBy: true, history: true } },
+                    _count: { select: { upvotes: true, downvotes: true, history: true } },
                 }
             }
         }
@@ -50,7 +50,39 @@ export async function getSavedBlogs(userId) {
             blog: {
                 include: {
                     tag: { include: { tag: true } },
-                    _count: { select: { likedBy: true, history: true } },
+                    _count: { select: { upvotes: true, downvotes: true, history: true } },
+                }
+            }
+        }
+    });
+    return records.map(r => normalizeBlogTags(r.blog));
+}
+
+export async function getUpvotedBlogs(userId) {
+    const records = await prisma.blogUpvote.findMany({
+        where: { userId },
+        orderBy: { id: "desc" },
+        include: {
+            blog: {
+                include: {
+                    tag: { include: { tag: true } },
+                    _count: { select: { upvotes: true, downvotes: true, history: true } },
+                }
+            }
+        }
+    });
+    return records.map(r => normalizeBlogTags(r.blog));
+}
+
+export async function getDownvotedBlogs(userId) {
+    const records = await prisma.blogDownvote.findMany({
+        where: { userId },
+        orderBy: { id: "desc" },
+        include: {
+            blog: {
+                include: {
+                    tag: { include: { tag: true } },
+                    _count: { select: { upvotes: true, downvotes: true, history: true } },
                 }
             }
         }

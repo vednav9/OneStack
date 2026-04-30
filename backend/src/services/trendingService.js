@@ -3,21 +3,27 @@ import { normalizeBlogTags } from "./blogService.js";
 
 export async function getTrendingBlogs() {
     const blogs = await prisma.blog.findMany({
-        take: 10,
-        orderBy: [
-            { likedBy: { _count: "desc" } },
-            { history: { _count: "desc" } },
-            { createdAt: "desc" },
-        ],
+        take: 50,
+        orderBy: [{ createdAt: "desc" }],
         include: {
             tag: { include: { tag: true } },
             _count: {
                 select: {
-                    likedBy: true,
+                    upvotes: true,
+                    downvotes: true,
                     history: true,
                 },
             },
         },
     });
-    return blogs.map(normalizeBlogTags);
+
+    const normalized = blogs.map(normalizeBlogTags);
+    const sorted = normalized.sort((a, b) => {
+        if ((b.score ?? 0) !== (a.score ?? 0)) return (b.score ?? 0) - (a.score ?? 0);
+        if ((b.upvotes ?? 0) !== (a.upvotes ?? 0)) return (b.upvotes ?? 0) - (a.upvotes ?? 0);
+        if ((b.reads ?? 0) !== (a.reads ?? 0)) return (b.reads ?? 0) - (a.reads ?? 0);
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+
+    return sorted.slice(0, 10);
 }
